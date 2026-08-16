@@ -1,0 +1,15 @@
+services:
+  raven:
+    build: .
+    image: raven:local
+    container_name: raven
+    ports:
+      - "8080:8080"
+    volumes:
+      - raven-data:/data
+    environment:
+      TZ: America/Sao_Paulo
+    restart: unless-stopped
+
+volumes:
+  raven-data:

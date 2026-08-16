@@ -1,0 +1,42 @@
+:root {
+  color: #f0ede7;
+  background: #11151f;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+h1 {
+  max-width: 12ch;
+  margin: 0 0 2rem;
+  font-size: clamp(2.6rem, 7vw, 5.5rem);
+  letter-spacing: -0.06em;
+  line-height: 0.94;
+}
+
+h2 {
+  margin: 0.45rem 0;
+  font-size: 1.05rem;
+}
+
+h3 {
+  margin: 0.25rem 0;
+  font-size: 0.96rem;
+}
+
+p {
+  margin: 0;
+  color: #9ca3b1;
+  line-height: 1.5;
+}

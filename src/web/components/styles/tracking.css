@@ -1,0 +1,96 @@
+.tracking-section {
+  margin-top: 3rem;
+}
+.tracking-list {
+  display: grid;
+  max-width: 50rem;
+  border-top: 1px solid #292f3d;
+}
+.tracked-item {
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.15rem 0;
+  border-bottom: 1px solid #292f3d;
+}
+.tracked-copy {
+  min-width: 0;
+}
+.quiet-button {
+  color: #c1b4ff;
+  align-self: center;
+}
+.coming-soon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 1rem;
+}
+.coming-soon-card {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border: 1px solid #33394a;
+  border-radius: 0.55rem;
+  background: #202738;
+  box-shadow: 0 0.6rem 1.6rem rgba(0, 0, 0, 0.18);
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+.coming-soon-card > img,
+.coming-soon-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.coming-soon-fallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #303b57, #1d2231);
+  color: #b8a9f7;
+  font-size: 2rem;
+  font-weight: 800;
+}
+.coming-soon-copy {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 3.75rem 1rem 1rem;
+  background: linear-gradient(transparent, rgba(10, 13, 21, 0.96) 54%);
+}
+.coming-soon-copy h2 {
+  font-size: 1.1rem;
+}
+.coming-soon-copy p {
+  font-size: 0.82rem;
+}
+.untrack-overlay {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  border: 1px solid rgba(237, 231, 255, 0.28);
+  border-radius: 99px;
+  padding: 0.35rem 0.6rem;
+  background: rgba(14, 17, 27, 0.72);
+  color: #f0ede7;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-0.25rem);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.coming-soon-card:hover,
+.coming-soon-card:focus-within {
+  border-color: #a995f7;
+  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.3);
+  transform: translateY(-0.25rem);
+}
+.coming-soon-card:hover .untrack-overlay,
+.coming-soon-card:focus-within .untrack-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
