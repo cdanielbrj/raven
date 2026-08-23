@@ -1,0 +1,11 @@
+.empty {
+  max-width: 35rem;
+  margin-top: 3rem;
+  padding: 1.5rem;
+  border-left: 2px solid #a995f7;
+  background: #171c27;
+}
+
+.empty h2 {
+  margin-top: 0;
+}

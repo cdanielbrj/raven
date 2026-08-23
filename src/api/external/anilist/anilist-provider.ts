@@ -19,6 +19,7 @@ interface AniListTitle {
 
 interface AniListMedia {
   id: number;
+  idMal: number | null;
   title: AniListTitle;
   siteUrl: string | null;
   coverImage: {
@@ -329,6 +330,7 @@ function normalizeEntity(media: AniListMedia): NormalizedEntity {
     externalUrl: media.siteUrl,
     metadata: {
       titles: media.title,
+      malId: media.idMal,
       format: media.format,
       status: media.status,
       season: media.season,
@@ -403,6 +405,7 @@ function parseRetryAfter(value: string | null): number | undefined {
 
 const MEDIA_FIELDS = `
   id
+  idMal
   title { english romaji native }
   siteUrl
   coverImage { extraLarge large medium }

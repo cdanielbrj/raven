@@ -1,0 +1,66 @@
+.tabs-layout {
+  min-height: 100vh;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+}
+
+.tabs-header {
+  display: flex;
+  min-height: 5rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #292f3d;
+}
+
+.tabs-wordmark,
+.tab-button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tabs-wordmark {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.tabs-navigation {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.tab-button {
+  padding: 1.8rem 0 1.55rem;
+  border-bottom: 2px solid transparent;
+  color: #8e94a1;
+}
+
+.tab-button.active {
+  border-color: #a995f7;
+  color: #f0ede7;
+}
+
+@media (max-width: 40rem) {
+  .tabs-layout {
+    padding: 0 1.1rem 2rem;
+  }
+
+  .tabs-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    padding-top: 1.15rem;
+  }
+
+  .tabs-navigation {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .tab-button {
+    padding: 0.8rem 0;
+  }
+}

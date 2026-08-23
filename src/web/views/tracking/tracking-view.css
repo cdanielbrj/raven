@@ -1,0 +1,21 @@
+.tracking-section {
+  margin-top: 3rem;
+}
+
+.tracking-list {
+  display: grid;
+  max-width: 50rem;
+  border-top: 1px solid #292f3d;
+}
+
+.coming-soon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 40rem) {
+  .coming-soon-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,15 @@
+.week {
+  margin-top: 0.5rem;
+}
+
+.week .section-label {
+  margin-top: 2rem;
+  margin-bottom: 1.35rem;
+}
+
+@media (max-width: 40rem) {
+  .week .section-label {
+    margin-top: 1.7rem;
+    margin-bottom: 1rem;
+  }
+}

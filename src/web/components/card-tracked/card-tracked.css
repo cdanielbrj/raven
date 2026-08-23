@@ -1,0 +1,27 @@
+.tracked-item {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 3rem 1fr auto;
+  gap: 1rem;
+  padding: 1.15rem 0;
+  border-bottom: 1px solid #292f3d;
+}
+
+.tracked-copy {
+  min-width: 0;
+}
+
+.quiet-button {
+  align-self: center;
+  border: 0;
+  background: transparent;
+  color: #c1b4ff;
+  cursor: pointer;
+}
+
+@media (max-width: 40rem) {
+  .tracked-item {
+    grid-template-columns: 2.6rem 1fr auto;
+    gap: 0.7rem;
+  }
+}

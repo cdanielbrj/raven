@@ -1,0 +1,25 @@
+.watch-provider {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.8rem;
+  display: grid;
+  max-width: 7.5rem;
+  min-height: 1.5rem;
+  place-items: center;
+  color: #d9d2ff;
+  font-size: 0.73rem;
+  text-align: right;
+  text-decoration: none;
+}
+
+.watch-provider img {
+  width: 1.6rem;
+  height: 1.6rem;
+  object-fit: contain;
+}
+
+.watch-provider:hover,
+.watch-provider:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+}

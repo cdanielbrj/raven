@@ -1,0 +1,12 @@
+.week-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+@media (max-width: 40rem) {
+  .week-calendar {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

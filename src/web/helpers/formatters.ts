@@ -79,8 +79,43 @@ export function isInThisCalendarWeek(event: TimelineEvent): boolean {
   return eventDate(event) <= endOfWeek;
 }
 
+export function calendarWeekStart(offset = 0, now = new Date()): Date {
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - start.getDay() + offset * 7);
+  return start;
+}
+
+export function calendarDays(start: Date): Date[] {
+  return Array.from({ length: 7 }, (_, index) => {
+    const day = new Date(start);
+    day.setDate(start.getDate() + index);
+    return day;
+  });
+}
+
+export function isEventOnDay(event: TimelineEvent, day: Date): boolean {
+  return dateKey(eventDate(event)) === dateKey(day);
+}
+
+export function formatCalendarDay(day: Date): string {
+  return new Intl.DateTimeFormat("en", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(day);
+}
+
+export function isTodayDate(day: Date): boolean {
+  return dateKey(day) === dateKey(new Date());
+}
+
 function eventDate(event: Pick<TimelineEvent, "startsAt" | "startsOn">): Date {
   return new Date(event.startsAt ?? `${event.startsOn}T12:00:00`);
+}
+
+function dateKey(date: Date): string {
+  return [date.getFullYear(), date.getMonth(), date.getDate()].join("-");
 }
 
 function isToday(event: TimelineEvent): boolean {

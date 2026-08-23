@@ -158,11 +158,15 @@ export class TrackingService {
   }
 
   listTimeline(format?: Entity["format"], now = new Date()): TimelineEvent[] {
-    const until = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const nowIso = now.toISOString();
-    const untilIso = until.toISOString();
-    const today = nowIso.slice(0, 10);
-    const untilDay = untilIso.slice(0, 10);
+    const weekStart = new Date(now);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    const weekStartIso = weekStart.toISOString();
+    const weekEndIso = weekEnd.toISOString();
+    const weekStartDay = weekStartIso.slice(0, 10);
+    const weekEndDay = weekEndIso.slice(0, 10);
     const rows = this.database
       .prepare(
         `
@@ -173,16 +177,16 @@ export class TrackingService {
       JOIN entities e ON e.id = ev.entity_id
       WHERE
         (ev.starts_at >= ? OR ev.starts_on >= ?)
-        AND (ev.starts_at < ? OR ev.starts_on <= ?)
+        AND (ev.starts_at < ? OR ev.starts_on < ?)
         ${format ? "AND ev.format = ?" : ""}
       ORDER BY COALESCE(ev.starts_at, ev.starts_on) ASC
     `,
       )
       .all(
-        nowIso,
-        today,
-        untilIso,
-        untilDay,
+        weekStartIso,
+        weekStartDay,
+        weekEndIso,
+        weekEndDay,
         ...(format ? [format] : []),
       ) as Record<string, unknown>[];
 

@@ -7,6 +7,7 @@ import {
 
 const media = {
   id: 52991,
+  idMal: 52991,
   title: {
     english: "Frieren: Beyond Journey’s End",
     romaji: "Sousou no Frieren",
@@ -70,6 +71,7 @@ describe("AniListProvider", () => {
     });
     expect(entity.metadata).toMatchObject({
       titles: media.title,
+      malId: 52991,
       status: "RELEASING",
       genres: ["Adventure", "Drama", "Fantasy"],
       bannerImage: "https://example.test/frieren-banner.jpg",

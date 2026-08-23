@@ -1,0 +1,109 @@
+.calendar-day {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 0.7rem 0.55rem;
+  border: 1px solid rgba(174, 161, 223, 0.16);
+  border-radius: 0.65rem;
+  background: rgba(22, 27, 39, 0.42);
+}
+
+.calendar-day.today .day-heading h2 {
+  color: #eee8ff;
+}
+
+.calendar-day .day-heading {
+  display: flex;
+  min-height: 3.25rem;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.5rem;
+}
+
+.calendar-day .day-heading h2 {
+  margin: 0;
+  color: #b5a7ff;
+  font-family: Caveat, ui-rounded, cursive;
+  font-size: clamp(1.35rem, 2.7vw, 1.8rem);
+  font-weight: 700;
+  letter-spacing: 0.015em;
+  line-height: 1;
+}
+
+.calendar-day .day-heading span {
+  color: #858d9e;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.calendar-events {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.calendar-empty {
+  min-height: 3.2rem;
+  color: #687080;
+  font-size: 0.76rem;
+}
+
+@media (max-width: 40rem) {
+  .calendar-day {
+    position: relative;
+    margin-top: 1.7rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .calendar-day::before {
+    position: absolute;
+    top: 3.7rem;
+    bottom: -1.7rem;
+    left: 1.1rem;
+    width: 1px;
+    background: rgba(181, 167, 255, 0.18);
+    content: "";
+  }
+
+  .calendar-day:last-child::before {
+    display: none;
+  }
+
+  .calendar-day .day-heading {
+    min-height: 0;
+    margin-bottom: 0.7rem;
+    padding: 0 0 0.55rem;
+  }
+
+  .calendar-day .day-heading h2 {
+    font-size: 1.3rem;
+  }
+
+  .calendar-events {
+    padding-left: 2.2rem;
+  }
+
+  .calendar-event,
+  .calendar-empty {
+    position: relative;
+  }
+
+  .calendar-event::before,
+  .calendar-empty::before {
+    position: absolute;
+    top: 0.85rem;
+    left: -1.65rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border: 2px solid #b5a7ff;
+    border-radius: 50%;
+    background: #11151f;
+    content: "";
+  }
+}

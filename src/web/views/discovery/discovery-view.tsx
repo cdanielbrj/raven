@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { request } from "../api";
-import { ErrorMessage } from "../components/media";
-import { metadataLabel } from "../components/helpers/formatters";
-import type { Entity, TrackedItem } from "../types";
+import { request } from "../../api";
+import { DefaultCard } from "../../components/card-default/card-default";
+import { DiscoveryControls } from "../../components/discovery-controls/discovery-controls";
+import { ErrorMessage } from "../../states/error-message/error-message";
+import type { Entity, TrackedItem } from "../../types";
+import "./discovery-view.css";
 
-export function DiscoveryPage({
+export function DiscoveryView({
   trackedIds,
   onTracked,
 }: {
@@ -63,63 +65,29 @@ export function DiscoveryPage({
     <section className="page">
       <p className="eyebrow">ANIME</p>
       <h1>Find what to observe.</h1>
-      <form className="search" onSubmit={submitSearch}>
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search anime"
-          aria-label="Search anime"
-        />
-        <button>Search</button>
-      </form>
-      <div className="filters">
-        {(["current", "next-season"] as const).map((item) => (
-          <button
-            key={item}
-            className={mode === item ? "filter active" : "filter"}
-            onClick={() => {
-              setMode(item);
-              setSearch("");
-            }}
-          >
-            {item.replace("-", " ")}
-          </button>
-        ))}
-      </div>
+      <DiscoveryControls
+        mode={mode}
+        search={search}
+        onSearchChange={setSearch}
+        onSubmit={submitSearch}
+        onModeChange={(nextMode) => {
+          setMode(nextMode);
+          setSearch("");
+        }}
+      />
       {error && <ErrorMessage message={error} />}
       {loading ? (
         <p className="muted">Observing AniList…</p>
       ) : (
         <div className="discovery-grid motion-list">
           {items.map((entity) => (
-            <article className="entity-card" key={entity.externalId}>
-              <div className="cover">
-                {entity.coverUrl ? (
-                  <img src={entity.coverUrl} alt="" />
-                ) : (
-                  <span>NO COVER</span>
-                )}
-              </div>
-              <div className="entity-copy">
-                <span className="format-tag">{entity.format}</span>
-                <h2>{entity.name}</h2>
-                <p>{metadataLabel(entity)}</p>
-              </div>
-              <button
-                className="track-button"
-                disabled={
-                  trackedIds.has(entity.externalId) ||
-                  tracking === entity.externalId
-                }
-                onClick={() => void track(entity)}
-              >
-                {trackedIds.has(entity.externalId)
-                  ? "Tracked"
-                  : tracking === entity.externalId
-                    ? "Tracking…"
-                    : "Track"}
-              </button>
-            </article>
+            <DefaultCard
+              entity={entity}
+              tracked={trackedIds.has(entity.externalId)}
+              tracking={tracking === entity.externalId}
+              onTrack={(trackedEntity) => void track(trackedEntity)}
+              key={entity.externalId}
+            />
           ))}
         </div>
       )}
