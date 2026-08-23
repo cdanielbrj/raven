@@ -5,9 +5,11 @@ import type { TrackedItem } from "../../types";
 export function ComingSoonCard({
   item,
   onUntrack,
+  detail,
 }: {
   item: TrackedItem;
   onUntrack: (entityId: string) => void;
+  detail?: string;
 }) {
   return (
     <article className="coming-soon-card">
@@ -19,7 +21,7 @@ export function ComingSoonCard({
       <div className="coming-soon-copy">
         <span className="format-tag">{item.entity.format}</span>
         <h2>{item.entity.name}</h2>
-        <p>{comingSoonDescription(item.entity)}</p>
+        <p>{detail ?? comingSoonDescription(item.entity)}</p>
       </div>
       {item.entity.id && (
         <button

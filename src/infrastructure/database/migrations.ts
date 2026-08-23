@@ -87,6 +87,29 @@ const migrations: Migration[] = [
       );
     `,
   },
+  {
+    id: "002_discovery_snapshots",
+    sql: `
+      CREATE TABLE discovery_snapshots (
+        id TEXT PRIMARY KEY,
+        format TEXT NOT NULL CHECK (format IN ('anime', 'sport', 'series', 'movie', 'game')),
+        provider TEXT NOT NULL,
+        query_key TEXT NOT NULL,
+        fetched_at TEXT NOT NULL,
+        UNIQUE (format, provider, query_key)
+      );
+
+      CREATE TABLE discovery_snapshot_items (
+        snapshot_id TEXT NOT NULL REFERENCES discovery_snapshots(id) ON DELETE CASCADE,
+        position INTEGER NOT NULL,
+        entity TEXT NOT NULL,
+        PRIMARY KEY (snapshot_id, position)
+      );
+
+      CREATE INDEX discovery_snapshots_by_query
+        ON discovery_snapshots (format, query_key, fetched_at DESC);
+    `,
+  },
 ];
 
 export function applyMigrations(database: Database.Database): void {

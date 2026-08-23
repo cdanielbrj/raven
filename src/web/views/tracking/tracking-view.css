@@ -8,6 +8,10 @@
   border-top: 1px solid #292f3d;
 }
 
+.tracking-description {
+  margin: -0.4rem 0 1rem;
+}
+
 .coming-soon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));

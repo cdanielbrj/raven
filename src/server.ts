@@ -1,4 +1,6 @@
 import { createApp } from "./api/internal/app.js";
+import { MalCatalogProvider } from "./api/external/mal/mal-catalog-provider.js";
+import { DiscoveryService } from "./application/discovery/discovery-service.js";
 import { loadConfig } from "./infrastructure/config.js";
 import { openDatabase } from "./infrastructure/database/database.js";
 import { AniListProvider } from "./api/external/anilist/anilist-provider.js";
@@ -8,11 +10,18 @@ import { TrackingService } from "./application/tracking/tracking-service.js";
 
 const config = loadConfig();
 const database = openDatabase(config.databasePath);
-const providers = new ProviderRegistry([new AniListProvider()]);
+const aniListProvider = new AniListProvider();
+const providers = new ProviderRegistry([aniListProvider]);
+const discoveryService = new DiscoveryService(
+  database,
+  aniListProvider,
+  config.malClientId ? new MalCatalogProvider(config.malClientId) : undefined,
+);
 const trackingService = new TrackingService(database, providers);
 const app = await createApp({
   database,
   providers,
+  discoveryService,
   trackingService,
   syncCoordinator: new SyncCoordinator(database, providers, trackingService),
 });

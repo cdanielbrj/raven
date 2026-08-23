@@ -16,6 +16,19 @@ Open `http://localhost:8080`. The health endpoint is available at
 The named `raven-data` volume persists the SQLite database. For a host-mounted
 volume, replace it in `compose.yaml` with a directory mapped to `/data`.
 
+## Optional MyAnimeList fallback
+
+Raven uses AniList as its primary anime catalog provider. A self-hosted
+installation can optionally configure MyAnimeList as a Discovery fallback:
+
+```sh
+cp .env.example .env
+```
+
+Set `MAL_CLIENT_ID` in `.env`. The container starts normally without it; when
+both live providers are unavailable, Raven serves the most recent matching
+Discovery snapshot from SQLite and marks it as outdated.
+
 ## Development
 
 Node.js 22 or newer is required.
@@ -40,6 +53,7 @@ every push and pull request.
 
 - `src/models`: provider-independent media models and contracts.
 - `src/application`: tracking use cases and synchronization orchestration.
+- `src/application/discovery`: catalog fallback and local Discovery snapshots.
 - `src/infrastructure`: configuration and SQLite migrations.
 - `src/api/internal`: Raven's HTTP API for its browser client.
 - `src/api/external`: third-party integrations, starting with AniList.

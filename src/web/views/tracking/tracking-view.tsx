@@ -30,8 +30,10 @@ export function TrackingView({
     await request(`/api/v1/tracking/${entityId}`, { method: "DELETE" });
     await load();
   };
-  const airing = items.filter((item) => item.nextEvent);
-  const comingSoon = items.filter((item) => !item.nextEvent);
+  const pendingSync = items.filter((item) => item.syncStatus === "pending");
+  const synced = items.filter((item) => item.syncStatus === "synced");
+  const airing = synced.filter((item) => item.nextEvent);
+  const comingSoon = synced.filter((item) => !item.nextEvent);
   return (
     <section className="page">
       <p className="eyebrow">TRACKING</p>
@@ -50,6 +52,24 @@ export function TrackingView({
             {airing.map((item) => (
               <TrackedCard
                 item={item}
+                onUntrack={(entityId) => void untrack(entityId)}
+                key={item.entity.id}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+      {pendingSync.length > 0 && (
+        <section className="tracking-section">
+          <p className="section-label">Following</p>
+          <p className="tracking-description">
+            Saved locally and waiting for schedule details.
+          </p>
+          <div className="coming-soon-grid motion-list">
+            {pendingSync.map((item) => (
+              <ComingSoonCard
+                item={item}
+                detail="Waiting for schedule details"
                 onUntrack={(entityId) => void untrack(entityId)}
                 key={item.entity.id}
               />

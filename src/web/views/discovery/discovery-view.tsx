@@ -3,7 +3,7 @@ import { request } from "../../api";
 import { DefaultCard } from "../../components/card-default/card-default";
 import { DiscoveryControls } from "../../components/discovery-controls/discovery-controls";
 import { ErrorMessage } from "../../states/error-message/error-message";
-import type { Entity, TrackedItem } from "../../types";
+import type { DiscoveryResponse, Entity, TrackedItem } from "../../types";
 import "./discovery-view.css";
 
 export function DiscoveryView({
@@ -19,6 +19,7 @@ export function DiscoveryView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tracking, setTracking] = useState<string | null>(null);
+  const [catalogNotice, setCatalogNotice] = useState<string | null>(null);
   const load = useCallback(async (kind: string, value?: string) => {
     setLoading(true);
     setError(null);
@@ -26,10 +27,23 @@ export function DiscoveryView({
       const query = value
         ? `search=${encodeURIComponent(value)}`
         : `kind=${kind}`;
-      const data = await request<{ items: Entity[] }>(
+      const data = await request<DiscoveryResponse>(
         `/api/v1/discovery/anime?${query}`,
       );
       setItems(data.items);
+      setCatalogNotice(
+        data.meta.stale
+          ? `Live catalog data is temporarily unavailable. Showing results updated ${new Intl.DateTimeFormat(
+              "en",
+              {
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              },
+            ).format(new Date(data.meta.updatedAt))}.`
+          : null,
+      );
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Discovery failed");
     } finally {
@@ -50,7 +64,10 @@ export function DiscoveryView({
       await request("/api/v1/tracking/anime", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ externalId: entity.externalId }),
+        body: JSON.stringify({
+          externalId: entity.externalId,
+          provider: entity.provider,
+        }),
       });
       await onTracked();
     } catch (reason) {
@@ -76,8 +93,9 @@ export function DiscoveryView({
         }}
       />
       {error && <ErrorMessage message={error} />}
+      {catalogNotice && <p className="catalog-notice">{catalogNotice}</p>}
       {loading ? (
-        <p className="muted">Observing AniList…</p>
+        <p className="muted">Loading catalog…</p>
       ) : (
         <div className="discovery-grid motion-list">
           {items.map((entity) => (

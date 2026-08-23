@@ -35,6 +35,7 @@ describe("TrackingService", () => {
     const tracked = await service.track("anime", "100");
     expect(tracked.entity.name).toBe("Example Anime");
     expect(tracked.nextEvent?.episodeNumber).toBe(1);
+    expect(tracked.syncStatus).toBe("synced");
     const [timelineEvent] = service.listTimeline();
     expect(timelineEvent.entity.metadata).toMatchObject({
       bannerImage: "https://example.test/banner.jpg",
@@ -80,6 +81,31 @@ describe("TrackingService", () => {
       database.prepare("SELECT COUNT(*) AS count FROM events").get(),
     ).toEqual({ count: 0 });
 
+    database.close();
+  });
+
+  it("keeps fallback catalog items locally when no schedule provider is registered", async () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), "raven-tracking-test-"),
+    );
+    temporaryDirectories.push(directory);
+    const database = openDatabase(path.join(directory, "raven.db"));
+    const service = new TrackingService(
+      database,
+      new ProviderRegistry([new FakeAnimeProvider()]),
+    );
+
+    await expect(
+      service.trackEntity({
+        ...new FakeAnimeProvider().entityForTest(),
+        provider: "mal",
+        externalId: "52991",
+      }),
+    ).resolves.toMatchObject({
+      entity: { provider: "mal" },
+      nextEvent: null,
+      syncStatus: "pending",
+    });
     database.close();
   });
 });
@@ -155,4 +181,8 @@ class FakeAnimeProvider implements Provider {
       trailer: { id: "example-trailer", site: "youtube" },
     },
   };
+
+  entityForTest(): NormalizedEntity {
+    return this.entity;
+  }
 }

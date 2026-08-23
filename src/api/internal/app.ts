@@ -10,11 +10,13 @@ import {
 import { ProviderRequestError } from "../../models/provider.js";
 import { SyncCoordinator } from "../../application/tracking/sync-coordinator.js";
 import { TrackingService } from "../../application/tracking/tracking-service.js";
+import { DiscoveryService } from "../../application/discovery/discovery-service.js";
 import { InvalidRequestError } from "./request-validation.js";
 
 interface AppDependencies {
   database: Database.Database;
   providers: ProviderRegistry;
+  discoveryService: DiscoveryService;
   trackingService: TrackingService;
   syncCoordinator: SyncCoordinator;
 }
@@ -22,6 +24,7 @@ interface AppDependencies {
 export async function createApp({
   database,
   providers,
+  discoveryService,
   trackingService,
   syncCoordinator,
 }: AppDependencies): Promise<FastifyInstance> {
@@ -72,10 +75,19 @@ export async function createApp({
       });
     }
 
-    const items = await providers
-      .primaryFor(format)
-      .discover({ kind, search: query.search, page });
-    return { items };
+    const result = await discoveryService.discover(format, {
+      kind,
+      search: query.search,
+      page,
+    });
+    return {
+      items: result.items,
+      meta: {
+        source: result.source,
+        stale: result.stale,
+        updatedAt: result.updatedAt,
+      },
+    };
   });
 
   app.get("/api/v1/tracking", async (request, reply) => {
@@ -91,7 +103,9 @@ export async function createApp({
       reply,
     );
     if (!format) return;
-    const body = request.body as { externalId?: unknown } | undefined;
+    const body = request.body as
+      | { externalId?: unknown; provider?: unknown }
+      | undefined;
     if (
       !body ||
       typeof body.externalId !== "string" ||
@@ -102,7 +116,16 @@ export async function createApp({
         .send({ error: "invalid_request", message: "externalId is required" });
     }
 
-    const item = await trackingService.track(format, body.externalId.trim());
+    const provider =
+      typeof body.provider === "string" && body.provider.trim()
+        ? body.provider.trim()
+        : providers.primaryFor(format).id;
+    const entity = await discoveryService.getEntity(
+      format,
+      provider,
+      body.externalId.trim(),
+    );
+    const item = await trackingService.trackEntity(entity);
     return reply.code(201).send(item);
   });
 

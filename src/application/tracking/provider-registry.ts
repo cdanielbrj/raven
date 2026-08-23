@@ -49,6 +49,11 @@ export class ProviderRegistry {
     return provider;
   }
 
+  has(providerId: string, format: Format): boolean {
+    const provider = this.providersById.get(providerId);
+    return provider?.format === format;
+  }
+
   list(): Provider[] {
     return [...this.providersById.values()];
   }

@@ -13,6 +13,7 @@ export interface AppConfig {
   port: number;
   dataDirectory: string;
   databasePath: string;
+  malClientId?: string;
 }
 
 export function loadConfig(environment = process.env): AppConfig {
@@ -23,5 +24,6 @@ export function loadConfig(environment = process.env): AppConfig {
     port: readPort(environment.PORT),
     dataDirectory,
     databasePath: path.join(dataDirectory, "raven.db"),
+    malClientId: environment.MAL_CLIENT_ID?.trim() || undefined,
   };
 }

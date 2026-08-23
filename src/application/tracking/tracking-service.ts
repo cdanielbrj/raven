@@ -8,6 +8,7 @@ export interface TrackedEntity {
   entity: Entity;
   tracking: Tracking;
   nextEvent: Event | null;
+  syncStatus: "synced" | "pending";
 }
 
 export interface TimelineEvent extends Event {
@@ -39,11 +40,7 @@ export class TrackingService {
     );
   }
 
-  private async trackWithProvider(
-    provider: Provider,
-    externalId: string,
-  ): Promise<TrackedEntity> {
-    const entity = await provider.getEntity(externalId);
+  async trackEntity(entity: NormalizedEntity): Promise<TrackedEntity> {
     const now = new Date().toISOString();
     const existing = this.database
       .prepare("SELECT id FROM entities WHERE provider = ? AND external_id = ?")
@@ -95,13 +92,24 @@ export class TrackingService {
         .run(trackingId?.id ?? randomUUID(), entityId, now, now);
     })();
 
-    await this.syncEntity(entityId, entity);
+    if (this.providers.has(entity.provider, entity.format)) {
+      await this.syncEntity(entityId, entity);
+    }
     return this.getTrackedEntity(entityId);
+  }
+
+  private async trackWithProvider(
+    provider: Provider,
+    externalId: string,
+  ): Promise<TrackedEntity> {
+    return this.trackEntity(await provider.getEntity(externalId));
   }
 
   async refreshAll(format: Entity["format"]): Promise<number> {
     const tracked = this.listTracked(format);
     for (const item of tracked) {
+      if (!this.providers.has(item.entity.provider, item.entity.format))
+        continue;
       const provider = this.providers.get(
         item.entity.provider,
         item.entity.format,
@@ -154,7 +162,15 @@ export class TrackingService {
       unknown
     >[];
 
-    return rows.map((row) => trackedEntityFromRow(row));
+    return rows.map((row) => {
+      const item = trackedEntityFromRow(row);
+      return {
+        ...item,
+        syncStatus: this.providers.has(item.entity.provider, item.entity.format)
+          ? "synced"
+          : "pending",
+      };
+    });
   }
 
   listTimeline(format?: Entity["format"], now = new Date()): TimelineEvent[] {
@@ -333,7 +349,9 @@ export class TrackingService {
   }
 }
 
-function trackedEntityFromRow(row: Record<string, unknown>): TrackedEntity {
+function trackedEntityFromRow(
+  row: Record<string, unknown>,
+): Omit<TrackedEntity, "syncStatus"> {
   const entity = entityFromRow(row);
   return {
     entity,

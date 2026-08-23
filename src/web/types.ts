@@ -35,8 +35,18 @@ export interface Entity {
   name: string;
   format: string;
   externalId: string;
+  provider: string;
   coverUrl: string | null;
   metadata: MediaMetadata | null;
+}
+
+export interface DiscoveryResponse {
+  items: Entity[];
+  meta: {
+    source: string;
+    stale: boolean;
+    updatedAt: string;
+  };
 }
 
 export interface TimelineEvent {
@@ -56,4 +66,5 @@ export interface TimelineEvent {
 export interface TrackedItem {
   entity: Entity;
   nextEvent: TimelineEvent | null;
+  syncStatus: "synced" | "pending";
 }

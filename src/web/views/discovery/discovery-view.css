@@ -3,3 +3,8 @@
   grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
   gap: 1rem;
 }
+
+.catalog-notice {
+  margin: 1rem 0;
+  color: #d6cfff;
+}
