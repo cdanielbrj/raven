@@ -5,6 +5,7 @@ import { Navbar } from "./layout/navbar/navbar";
 import { DiscoveryView } from "./views/discovery/discovery-view";
 import { TrackingView } from "./views/tracking/tracking-view";
 import { UpcomingView } from "./views/upcoming/upcoming-view";
+import { SettingsView } from "./views/settings/settings-view";
 import "./styles.css";
 import type { TrackedItem, View } from "./types";
 
@@ -30,6 +31,7 @@ function App() {
         <DiscoveryView trackedIds={trackedIds} onTracked={refreshTracking} />
       )}
       {view === "tracking" && <TrackingView onChanged={refreshTracking} />}
+      {view === "settings" && <SettingsView />}
     </Navbar>
   );
 }

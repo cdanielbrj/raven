@@ -9,7 +9,7 @@ const navigationItems = [
   { label: "Upcoming", view: "upcoming" },
   { label: "Discovery", view: "discovery" },
   { label: "Tracking", view: "tracking" },
-  { label: "Settings" },
+  { label: "Settings", view: "settings" },
 ] as const;
 
 export function Navbar({

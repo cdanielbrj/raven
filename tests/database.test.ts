@@ -30,6 +30,7 @@ describe("database foundation", () => {
         "dismissed_events",
         "entities",
         "events",
+        "provider_health",
         "provider_sync_state",
         "schema_migrations",
         "settings",

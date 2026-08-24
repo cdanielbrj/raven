@@ -7,21 +7,46 @@ import { AniListProvider } from "./api/external/anilist/anilist-provider.js";
 import { ProviderRegistry } from "./application/tracking/provider-registry.js";
 import { SyncCoordinator } from "./application/tracking/sync-coordinator.js";
 import { TrackingService } from "./application/tracking/tracking-service.js";
+import { SettingsService } from "./application/settings/settings-service.js";
 
 const config = loadConfig();
 const database = openDatabase(config.databasePath);
 const aniListProvider = new AniListProvider();
+const malProvider = config.malClientId
+  ? new MalCatalogProvider(config.malClientId)
+  : undefined;
 const providers = new ProviderRegistry([aniListProvider]);
 const discoveryService = new DiscoveryService(
   database,
   aniListProvider,
-  config.malClientId ? new MalCatalogProvider(config.malClientId) : undefined,
+  malProvider,
 );
 const trackingService = new TrackingService(database, providers);
 const app = await createApp({
   database,
   providers,
   discoveryService,
+  settingsService: new SettingsService(
+    database,
+    config.databasePath,
+    [
+      {
+        id: "anilist",
+        label: "AniList",
+        configured: true,
+        check: () => aniListProvider.discover({ kind: "current", page: 1 }),
+      },
+      {
+        id: "mal",
+        label: "MyAnimeList",
+        configured: Boolean(malProvider),
+        check: malProvider
+          ? () => malProvider.discover({ kind: "current", page: 1 })
+          : undefined,
+      },
+    ],
+    process.env.npm_package_version ?? "0.1.0",
+  ),
   trackingService,
   syncCoordinator: new SyncCoordinator(database, providers, trackingService),
 });

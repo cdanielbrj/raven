@@ -1,4 +1,31 @@
-export type View = "upcoming" | "discovery" | "tracking";
+export type View = "upcoming" | "discovery" | "tracking" | "settings";
+
+export type ProviderConnectionStatus =
+  | "available"
+  | "not_checked"
+  | "not_configured"
+  | "unavailable";
+
+export interface SettingsOverview {
+  installation: {
+    mode: "local-first";
+    version: string;
+  };
+  database: {
+    sizeBytes: number;
+    schemaVersion: number;
+    trackedItems: number;
+    upcomingEvents: number;
+    discoverySnapshots: number;
+  };
+  providers: Array<{
+    id: string;
+    label: string;
+    status: ProviderConnectionStatus;
+    lastCheckedAt: string | null;
+    lastSucceededAt: string | null;
+  }>;
+}
 
 export interface StartDate {
   year: number | null;

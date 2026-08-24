@@ -11,12 +11,17 @@ import { ProviderRequestError } from "../../models/provider.js";
 import { SyncCoordinator } from "../../application/tracking/sync-coordinator.js";
 import { TrackingService } from "../../application/tracking/tracking-service.js";
 import { DiscoveryService } from "../../application/discovery/discovery-service.js";
+import {
+  ProviderHealthTargetNotFoundError,
+  SettingsService,
+} from "../../application/settings/settings-service.js";
 import { InvalidRequestError } from "./request-validation.js";
 
 interface AppDependencies {
   database: Database.Database;
   providers: ProviderRegistry;
   discoveryService: DiscoveryService;
+  settingsService: SettingsService;
   trackingService: TrackingService;
   syncCoordinator: SyncCoordinator;
 }
@@ -25,6 +30,7 @@ export async function createApp({
   database,
   providers,
   discoveryService,
+  settingsService,
   trackingService,
   syncCoordinator,
 }: AppDependencies): Promise<FastifyInstance> {
@@ -53,6 +59,14 @@ export async function createApp({
     providerCount: providers.list().length,
     sync: "manual",
   }));
+
+  app.get("/api/v1/settings", async () => settingsService.getOverview());
+
+  app.post("/api/v1/settings/providers/:providerId/check", async (request) =>
+    settingsService.checkProvider(
+      (request.params as { providerId: string }).providerId,
+    ),
+  );
 
   app.get("/api/v1/discovery/:format", async (request, reply) => {
     const format = resolveFormat(
@@ -190,6 +204,12 @@ export async function createApp({
     }
 
     if (error instanceof ProviderNotRegisteredError) {
+      return reply
+        .code(404)
+        .send({ error: "provider_not_configured", message: error.message });
+    }
+
+    if (error instanceof ProviderHealthTargetNotFoundError) {
       return reply
         .code(404)
         .send({ error: "provider_not_configured", message: error.message });

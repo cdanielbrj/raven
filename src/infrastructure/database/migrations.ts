@@ -110,6 +110,18 @@ const migrations: Migration[] = [
         ON discovery_snapshots (format, query_key, fetched_at DESC);
     `,
   },
+  {
+    id: "003_provider_health",
+    sql: `
+      CREATE TABLE provider_health (
+        provider TEXT PRIMARY KEY,
+        status TEXT NOT NULL CHECK (status IN ('available', 'unavailable')),
+        last_checked_at TEXT NOT NULL,
+        last_succeeded_at TEXT,
+        updated_at TEXT NOT NULL
+      );
+    `,
+  },
 ];
 
 export function applyMigrations(database: Database.Database): void {
