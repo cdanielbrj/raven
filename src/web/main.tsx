@@ -1,7 +1,7 @@
 import { StrictMode, useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { request } from "./api";
-import { Tabs } from "./layout/tabs/tabs";
+import { Navbar } from "./layout/navbar/navbar";
 import { DiscoveryView } from "./views/discovery/discovery-view";
 import { TrackingView } from "./views/tracking/tracking-view";
 import { UpcomingView } from "./views/upcoming/upcoming-view";
@@ -24,13 +24,13 @@ function App() {
   }, [refreshTracking]);
 
   return (
-    <Tabs activeView={view} onNavigate={setView}>
+    <Navbar activeView={view} onNavigate={setView}>
       {view === "upcoming" && <UpcomingView />}
       {view === "discovery" && (
         <DiscoveryView trackedIds={trackedIds} onTracked={refreshTracking} />
       )}
       {view === "tracking" && <TrackingView onChanged={refreshTracking} />}
-    </Tabs>
+    </Navbar>
   );
 }
 
