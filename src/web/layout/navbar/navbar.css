@@ -65,11 +65,8 @@
   font: inherit;
   font-size: 0.82rem;
   font-weight: 700;
+  text-decoration: none;
   white-space: nowrap;
-}
-
-button.navbar-item {
-  cursor: pointer;
 }
 
 .navbar-item.active {

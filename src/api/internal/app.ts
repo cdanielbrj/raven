@@ -24,6 +24,7 @@ interface AppDependencies {
   settingsService: SettingsService;
   trackingService: TrackingService;
   syncCoordinator: SyncCoordinator;
+  webRoot?: string;
 }
 
 export async function createApp({
@@ -33,9 +34,10 @@ export async function createApp({
   settingsService,
   trackingService,
   syncCoordinator,
+  webRoot: configuredWebRoot,
 }: AppDependencies): Promise<FastifyInstance> {
   const app = fastify({ logger: true });
-  const webRoot = path.resolve(process.cwd(), "dist/web");
+  const webRoot = configuredWebRoot ?? path.resolve(process.cwd(), "dist/web");
 
   await app.register(fastifyStatic, {
     root: webRoot,
@@ -173,6 +175,13 @@ export async function createApp({
       return reply.code(404).send({ error: "not_found" });
     }
     return reply.code(204).send();
+  });
+
+  app.get("/*", async (request, reply) => {
+    if (request.url.startsWith("/api/")) {
+      return reply.code(404).send({ error: "not_found" });
+    }
+    return reply.sendFile("index.html");
   });
 
   app.setErrorHandler((error, _request, reply) => {

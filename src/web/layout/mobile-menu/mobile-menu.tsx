@@ -1,24 +1,16 @@
 import { useEffect, useState } from "react";
-import type { View } from "../../types";
+import { NavLink } from "react-router";
+import type { NavigationItem } from "../../routes/navigation";
 import "./mobile-menu.css";
 
-export interface MobileMenuItem {
-  label: string;
-  view?: View;
-}
-
 export function MobileMenu({
-  activeView,
   isOpen,
   items,
   onClose,
-  onNavigate,
 }: {
-  activeView: View;
   isOpen: boolean;
-  items: readonly MobileMenuItem[];
+  items: readonly NavigationItem[];
   onClose: () => void;
-  onNavigate: (view: View) => void;
 }) {
   const [isRendered, setIsRendered] = useState(isOpen);
 
@@ -71,10 +63,8 @@ export function MobileMenu({
         <nav className="mobile-menu-items">
           {items.map((item) => (
             <MobileMenuNavigationItem
-              active={item.view === activeView}
               item={item}
               onClose={onClose}
-              onNavigate={onNavigate}
               key={item.label}
             />
           ))}
@@ -95,33 +85,26 @@ export function MobileMenu({
 }
 
 function MobileMenuNavigationItem({
-  active,
   item,
   onClose,
-  onNavigate,
 }: {
-  active: boolean;
-  item: MobileMenuItem;
+  item: NavigationItem;
   onClose: () => void;
-  onNavigate: (view: View) => void;
 }) {
-  const className = active ? "mobile-menu-item active" : "mobile-menu-item";
-
-  if (!item.view) {
-    return <span className={className}>{item.label}</span>;
+  if (!item.to) {
+    return <span className="mobile-menu-item">{item.label}</span>;
   }
 
   return (
-    <button
-      className={className}
-      aria-current={active ? "page" : undefined}
-      onClick={() => {
-        onNavigate(item.view);
-        onClose();
-      }}
+    <NavLink
+      className={({ isActive }) =>
+        isActive ? "mobile-menu-item active" : "mobile-menu-item"
+      }
+      onClick={onClose}
+      to={item.to}
     >
       {item.label}
-    </button>
+    </NavLink>
   );
 }
 

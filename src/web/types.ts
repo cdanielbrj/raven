@@ -1,5 +1,3 @@
-export type View = "upcoming" | "discovery" | "tracking" | "settings";
-
 export type ProviderConnectionStatus =
   | "available"
   | "not_checked"

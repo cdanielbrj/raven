@@ -1,26 +1,10 @@
 import { useState, type ReactNode } from "react";
+import { NavLink } from "react-router";
 import { MobileMenu } from "../mobile-menu/mobile-menu";
-import type { View } from "../../types";
+import { navigationItems, type NavigationItem } from "../../routes/navigation";
 import "./navbar.css";
 
-const navigationItems = [
-  { label: "Overview" },
-  { label: "Calendar" },
-  { label: "Upcoming", view: "upcoming" },
-  { label: "Discovery", view: "discovery" },
-  { label: "Tracking", view: "tracking" },
-  { label: "Settings", view: "settings" },
-] as const;
-
-export function Navbar({
-  activeView,
-  children,
-  onNavigate,
-}: {
-  activeView: View;
-  children: ReactNode;
-  onNavigate: (view: View) => void;
-}) {
+export function Navbar({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -32,12 +16,7 @@ export function Navbar({
         </div>
         <nav className="navbar-navigation" aria-label="Primary navigation">
           {navigationItems.map((item) => (
-            <NavbarItem
-              active={item.view === activeView}
-              item={item}
-              onNavigate={onNavigate}
-              key={item.label}
-            />
+            <NavbarItem item={item} key={item.label} />
           ))}
         </nav>
         <div className="topbar-utilities" aria-label="Account utilities">
@@ -60,39 +39,28 @@ export function Navbar({
       </header>
       <main className="raven-content">{children}</main>
       <MobileMenu
-        activeView={activeView}
         isOpen={isMobileMenuOpen}
         items={navigationItems}
         onClose={() => setMobileMenuOpen(false)}
-        onNavigate={onNavigate}
       />
     </div>
   );
 }
 
-function NavbarItem({
-  active,
-  item,
-  onNavigate,
-}: {
-  active: boolean;
-  item: (typeof navigationItems)[number];
-  onNavigate: (view: View) => void;
-}) {
-  const className = `navbar-item${active ? " active" : ""}`;
-
-  if (!item.view) {
-    return <span className={className}>{item.label}</span>;
+function NavbarItem({ item }: { item: NavigationItem }) {
+  if (!item.to) {
+    return <span className="navbar-item">{item.label}</span>;
   }
 
   return (
-    <button
-      className={className}
-      aria-current={active ? "page" : undefined}
-      onClick={() => onNavigate(item.view)}
+    <NavLink
+      className={({ isActive }) =>
+        isActive ? "navbar-item active" : "navbar-item"
+      }
+      to={item.to}
     >
       {item.label}
-    </button>
+    </NavLink>
   );
 }
 
