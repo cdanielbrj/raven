@@ -1,18 +1,29 @@
 import { useState, type ReactNode } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useLocation } from "react-router";
 import { MobileMenu } from "../mobile-menu/mobile-menu";
-import { navigationItems, type NavigationItem } from "../../routes/navigation";
+import {
+  navigationItemsFor,
+  type NavigationItem,
+} from "../../routes/navigation";
 import "./navbar.css";
 
 export function Navbar({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { pathname } = useLocation();
+  const context = pathname.startsWith("/sports/nba/") ? "nba" : "anime";
+  const navigationItems = navigationItemsFor(context);
 
   return (
     <div className="raven-layout">
       <header className="raven-navbar">
-        <div className="media-context" aria-label="Current media type: Anime">
+        <div
+          className={`media-context${context === "nba" ? " media-context-sports" : ""}`}
+          aria-label={`Current media type: ${context === "nba" ? "Sports" : "Anime"}`}
+        >
           <span className="media-context-name">RAVEN</span>
-          <span className="media-context-type">Anime</span>
+          <span className="media-context-type">
+            {context === "nba" ? "Sports" : "Anime"}
+          </span>
         </div>
         <nav className="navbar-navigation" aria-label="Primary navigation">
           {navigationItems.map((item) => (

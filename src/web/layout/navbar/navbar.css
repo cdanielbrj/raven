@@ -43,6 +43,15 @@
   line-height: 1;
 }
 
+.media-context-sports .media-context-type {
+  color: #ea5b5b;
+  font-family: Righteous, ui-sans-serif, sans-serif;
+  font-size: 1.08rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
 .navbar-navigation {
   display: flex;
   align-items: center;

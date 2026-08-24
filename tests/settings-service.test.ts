@@ -37,7 +37,7 @@ describe("SettingsService", () => {
     expect(service.getOverview()).toMatchObject({
       installation: { mode: "local-first", version: "0.1.0" },
       database: {
-        schemaVersion: 3,
+        schemaVersion: 5,
         trackedItems: 0,
         upcomingEvents: 0,
         discoverySnapshots: 0,

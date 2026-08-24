@@ -23,6 +23,12 @@ export interface NormalizedEntity
 export interface NormalizedEvent
   extends Omit<Event, "id" | "entityId" | "createdAt" | "updatedAt"> {}
 
+export interface NormalizedEventParticipant {
+  provider: string;
+  externalId: string;
+  role: string;
+}
+
 export interface ProviderSyncPolicy {
   defaultIntervalMs: number;
   maxConcurrentSyncs: number;

@@ -14,6 +14,8 @@ export interface AppConfig {
   dataDirectory: string;
   databasePath: string;
   malClientId?: string;
+  ballDontLieApiKey?: string;
+  theSportsDbApiKey?: string;
 }
 
 export function loadConfig(environment = process.env): AppConfig {
@@ -25,5 +27,7 @@ export function loadConfig(environment = process.env): AppConfig {
     dataDirectory,
     databasePath: path.join(dataDirectory, "raven.db"),
     malClientId: environment.MAL_CLIENT_ID?.trim() || undefined,
+    ballDontLieApiKey: environment.BALLDONTLIE_API_KEY?.trim() || undefined,
+    theSportsDbApiKey: environment.THESPORTSDB_API_KEY?.trim() || undefined,
   };
 }

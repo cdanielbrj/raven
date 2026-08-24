@@ -11,3 +11,18 @@ export const navigationItems: readonly NavigationItem[] = [
   { label: "Tracking", to: "/anime/tracking" },
   { label: "Settings", to: "/settings" },
 ];
+
+export function navigationItemsFor(
+  context: "anime" | "nba",
+): readonly NavigationItem[] {
+  if (context === "anime") return navigationItems;
+
+  return [
+    { label: "Overview" },
+    { label: "Calendar" },
+    { label: "Upcoming" },
+    { label: "Teams", to: "/sports/nba/teams" },
+    { label: "Tracking", to: "/sports/nba/tracking" },
+    { label: "Settings", to: "/settings" },
+  ];
+}

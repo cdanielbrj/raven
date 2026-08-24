@@ -10,35 +10,62 @@ import {
 import type { CatalogProvider } from "../../models/catalog.js";
 
 export class DiscoveryService {
+  private readonly providers: CatalogProvider[];
+
   constructor(
     private readonly database: Database.Database,
-    private readonly primary: CatalogProvider,
-    private readonly fallback?: CatalogProvider,
-  ) {}
+    primary: CatalogProvider | CatalogProvider[],
+    fallback?: CatalogProvider,
+  ) {
+    this.providers = Array.isArray(primary)
+      ? primary
+      : [primary, ...(fallback ? [fallback] : [])];
+  }
 
   async discover(
     format: Format,
     query: DiscoveryQuery,
   ): Promise<DiscoveryResult> {
-    if (format !== this.primary.format) {
+    const [primary, ...fallbacks] = this.providersFor(format);
+    if (!primary) {
       throw new ProviderRequestError(`No catalog provider for ${format}`);
     }
 
     try {
-      const items = await this.primary.discover(query);
-      return this.persist(this.primary.id, format, query, items);
+      const items = await primary.discover(query);
+      return this.persist(primary.id, format, query, items);
     } catch (primaryError) {
-      if (!canFallback(primaryError) || !this.fallback) {
+      if (!canFallback(primaryError) || fallbacks.length === 0) {
         return this.fromSnapshotOrThrow(format, query, primaryError);
       }
 
-      try {
-        const items = await this.fallback.discover(query);
-        return this.persist(this.fallback.id, format, query, items);
-      } catch (fallbackError) {
-        return this.fromSnapshotOrThrow(format, query, fallbackError);
+      let fallbackError: unknown = primaryError;
+      for (const fallback of fallbacks) {
+        try {
+          const items = await fallback.discover(query);
+          return this.persist(fallback.id, format, query, items);
+        } catch (error) {
+          fallbackError = error;
+          if (!canFallback(error)) break;
+        }
       }
+      return this.fromSnapshotOrThrow(format, query, fallbackError);
     }
+  }
+
+  async discoverCached(
+    format: Format,
+    query: DiscoveryQuery,
+    maxAgeMs: number,
+  ): Promise<DiscoveryResult> {
+    const snapshot = this.readSnapshot(format, query);
+    if (
+      snapshot &&
+      Date.now() - new Date(snapshot.updatedAt).getTime() <= maxAgeMs
+    ) {
+      return { ...snapshot, stale: false };
+    }
+    return this.discover(format, query);
   }
 
   async getEntity(
@@ -46,9 +73,8 @@ export class DiscoveryService {
     providerId: string,
     externalId: string,
   ): Promise<NormalizedEntity> {
-    const provider = [this.primary, this.fallback].find(
-      (candidate) =>
-        candidate?.id === providerId && candidate.format === format,
+    const provider = this.providersFor(format).find(
+      (candidate) => candidate.id === providerId,
     );
     if (!provider) {
       throw new ProviderRequestError(
@@ -56,7 +82,13 @@ export class DiscoveryService {
         404,
       );
     }
+    const cached = this.findCachedEntity(format, providerId, externalId);
+    if (cached) return cached;
     return provider.getEntity(externalId);
+  }
+
+  private providersFor(format: Format): CatalogProvider[] {
+    return this.providers.filter((provider) => provider.format === format);
   }
 
   private persist(
@@ -105,6 +137,15 @@ export class DiscoveryService {
     query: DiscoveryQuery,
     error: unknown,
   ): DiscoveryResult {
+    const snapshot = this.readSnapshot(format, query);
+    if (!snapshot) throw error;
+    return { ...snapshot, stale: true };
+  }
+
+  private readSnapshot(
+    format: Format,
+    query: DiscoveryQuery,
+  ): DiscoveryResult | undefined {
     const snapshot = this.database
       .prepare(
         `SELECT id, provider, fetched_at FROM discovery_snapshots
@@ -114,7 +155,7 @@ export class DiscoveryService {
       .get(format, discoveryQueryKey(query)) as
       | { id: string; provider: string; fetched_at: string }
       | undefined;
-    if (!snapshot) throw error;
+    if (!snapshot) return undefined;
 
     const items = this.database
       .prepare(
@@ -128,9 +169,36 @@ export class DiscoveryService {
     return {
       items,
       source: snapshot.provider,
-      stale: true,
+      stale: false,
       updatedAt: snapshot.fetched_at,
     };
+  }
+
+  private findCachedEntity(
+    format: Format,
+    provider: string,
+    externalId: string,
+  ): NormalizedEntity | undefined {
+    const snapshots = this.database
+      .prepare(
+        `SELECT id FROM discovery_snapshots
+         WHERE format = ? AND provider = ? ORDER BY fetched_at DESC`,
+      )
+      .all(format, provider) as Array<{ id: string }>;
+
+    for (const snapshot of snapshots) {
+      const rows = this.database
+        .prepare(
+          `SELECT entity FROM discovery_snapshot_items
+           WHERE snapshot_id = ? ORDER BY position ASC`,
+        )
+        .all(snapshot.id) as Array<{ entity: string }>;
+      const entity = rows
+        .map((row) => JSON.parse(row.entity) as NormalizedEntity)
+        .find((item) => item.externalId === externalId);
+      if (entity) return entity;
+    }
+    return undefined;
   }
 }
 

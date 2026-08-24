@@ -148,7 +148,14 @@ export class TrackingService {
       JOIN tracking t ON t.entity_id = e.id AND t.enabled = 1
       LEFT JOIN events ne ON ne.id = (
         SELECT events.id FROM events
-        WHERE events.entity_id = e.id
+        WHERE (
+          events.entity_id = e.id
+          OR EXISTS (
+            SELECT 1 FROM event_participants
+            WHERE event_participants.event_id = events.id
+              AND event_participants.entity_id = e.id
+          )
+        )
           AND (events.starts_at >= ? OR events.starts_on >= ?)
         ORDER BY COALESCE(events.starts_at, events.starts_on) ASC
         LIMIT 1
@@ -189,7 +196,14 @@ export class TrackingService {
       SELECT ev.*, e.name AS entity_name, e.cover_url AS entity_cover_url, e.metadata AS entity_metadata,
         e.icon_url AS entity_icon_url, e.external_url AS entity_external_url
       FROM events ev
-      JOIN tracking t ON t.entity_id = ev.entity_id AND t.enabled = 1
+      JOIN tracking t ON t.enabled = 1 AND (
+        t.entity_id = ev.entity_id
+        OR EXISTS (
+          SELECT 1 FROM event_participants
+          WHERE event_participants.event_id = ev.id
+            AND event_participants.entity_id = t.entity_id
+        )
+      )
       JOIN entities e ON e.id = ev.entity_id
       WHERE
         (ev.starts_at >= ? OR ev.starts_on >= ?)
@@ -310,6 +324,14 @@ export class TrackingService {
           metadata = excluded.metadata,
           updated_at = excluded.updated_at
       `);
+      const eventIdByExternalId = this.database.prepare(
+        "SELECT id FROM events WHERE provider = ? AND external_id = ?",
+      );
+      const upsertParticipant = this.database.prepare(`
+        INSERT INTO event_participants (event_id, entity_id, role)
+        VALUES (?, ?, ?)
+        ON CONFLICT(event_id, entity_id) DO UPDATE SET role = excluded.role
+      `);
 
       for (const event of events) {
         if (
@@ -317,8 +339,9 @@ export class TrackingService {
           isDismissed.get(event.provider, event.externalId, now)
         )
           continue;
+        const eventId = randomUUID();
         upsertEvent.run(
-          randomUUID(),
+          eventId,
           entityId,
           event.name,
           event.type,
@@ -336,6 +359,14 @@ export class TrackingService {
           now,
           now,
         );
+        const persistedEventId = event.externalId
+          ? (
+              eventIdByExternalId.get(event.provider, event.externalId) as {
+                id: string;
+              }
+            ).id
+          : eventId;
+        upsertParticipant.run(persistedEventId, entityId, "subject");
       }
     })();
   }

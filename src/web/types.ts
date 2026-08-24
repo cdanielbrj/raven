@@ -53,6 +53,18 @@ export interface MediaMetadata {
   bannerImage?: string | null;
   trailer?: Trailer | null;
   availability?: Availability | null;
+  abbreviation?: string;
+  conference?: string;
+  division?: string;
+  competition?: {
+    id: string;
+    name: string;
+    sport: string;
+  };
+  assetSource?: {
+    provider: string;
+    externalId: string;
+  };
 }
 
 export interface Entity {
@@ -62,6 +74,7 @@ export interface Entity {
   externalId: string;
   provider: string;
   coverUrl: string | null;
+  iconUrl: string | null;
   metadata: MediaMetadata | null;
 }
 
@@ -71,6 +84,12 @@ export interface DiscoveryResponse {
     source: string;
     stale: boolean;
     updatedAt: string;
+    assets?: {
+      status: "complete" | "partial" | "syncing";
+      resolved: number;
+      missing: number;
+      total: number;
+    };
   };
 }
 

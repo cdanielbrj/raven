@@ -63,6 +63,19 @@ describe("DiscoveryService", () => {
     });
     database.close();
   });
+
+  it("returns a fresh snapshot without querying the provider again", async () => {
+    const database = testDatabase();
+    const provider = new FakeCatalogProvider("anilist", [entity]);
+    const service = new DiscoveryService(database, provider);
+
+    await service.discover("anime", { kind: "current" });
+    await expect(
+      service.discoverCached("anime", { kind: "current" }, 60_000),
+    ).resolves.toMatchObject({ items: [entity], stale: false });
+    expect(provider.calls).toBe(1);
+    database.close();
+  });
 });
 
 class FakeCatalogProvider implements CatalogProvider {
@@ -73,7 +86,10 @@ class FakeCatalogProvider implements CatalogProvider {
     private readonly result: NormalizedEntity[] | Error,
   ) {}
 
+  calls = 0;
+
   async discover(): Promise<NormalizedEntity[]> {
+    this.calls += 1;
     if (this.result instanceof Error) throw this.result;
     return this.result;
   }

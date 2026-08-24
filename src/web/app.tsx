@@ -5,21 +5,30 @@ import { Navbar } from "./layout/navbar/navbar";
 import { DiscoveryView } from "./views/discovery/discovery-view";
 import { SettingsView } from "./views/settings/settings-view";
 import { TrackingView } from "./views/tracking/tracking-view";
+import { TeamsTrackingView } from "./views/teams-tracking/teams-tracking-view";
+import { TeamsView } from "./views/teams/teams-view";
 import { UpcomingView } from "./views/upcoming/upcoming-view";
 import type { TrackedItem } from "./types";
 
 export function App() {
-  const [trackedIds, setTrackedIds] = useState<Set<string>>(new Set());
-  const refreshTracking = useCallback(async () => {
+  const [trackedIds, setTrackedIds] = useState<Record<string, Set<string>>>({
+    anime: new Set(),
+    sport: new Set(),
+  });
+  const refreshTracking = useCallback(async (format: "anime" | "sport") => {
     const data = await request<{ items: TrackedItem[] }>(
-      "/api/v1/tracking?format=anime",
+      `/api/v1/tracking?format=${format}`,
     );
-    setTrackedIds(new Set(data.items.map((item) => item.entity.externalId)));
+    setTrackedIds((current) => ({
+      ...current,
+      [format]: new Set(data.items.map((item) => item.entity.externalId)),
+    }));
     return data.items;
   }, []);
 
   useEffect(() => {
-    void refreshTracking().catch(() => undefined);
+    void refreshTracking("anime").catch(() => undefined);
+    void refreshTracking("sport").catch(() => undefined);
   }, [refreshTracking]);
 
   return (
@@ -39,8 +48,8 @@ export function App() {
           element={
             <AnimeRoute>
               <DiscoveryView
-                trackedIds={trackedIds}
-                onTracked={refreshTracking}
+                trackedIds={trackedIds.anime}
+                onTracked={() => refreshTracking("anime")}
               />
             </AnimeRoute>
           }
@@ -49,9 +58,28 @@ export function App() {
           path="/:format/tracking"
           element={
             <AnimeRoute>
-              <TrackingView onChanged={refreshTracking} />
+              <TrackingView onChanged={() => refreshTracking("anime")} />
             </AnimeRoute>
           }
+        />
+        <Route
+          path="/sports/nba/teams"
+          element={
+            <TeamsView
+              trackedIds={trackedIds.sport}
+              onTracked={() => refreshTracking("sport")}
+            />
+          }
+        />
+        <Route
+          path="/sports/nba/tracking"
+          element={
+            <TeamsTrackingView onChanged={() => refreshTracking("sport")} />
+          }
+        />
+        <Route
+          path="/nba/teams"
+          element={<Navigate to="/sports/nba/teams" replace />}
         />
         <Route path="/settings" element={<SettingsView />} />
         <Route path="*" element={<Navigate to="/anime/upcoming" replace />} />

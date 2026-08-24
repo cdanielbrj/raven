@@ -9,6 +9,7 @@ import { ProviderRegistry } from "../src/application/tracking/provider-registry.
 import { SyncCoordinator } from "../src/application/tracking/sync-coordinator.js";
 import { TrackingService } from "../src/application/tracking/tracking-service.js";
 import { openDatabase } from "../src/infrastructure/database/database.js";
+import type { CatalogProvider } from "../src/models/catalog.js";
 import type {
   DiscoveryQuery,
   NormalizedEntity,
@@ -53,13 +54,51 @@ describe("HTTP contracts", () => {
     expect(missingRoute.statusCode).toBe(404);
     expect(missingRoute.json()).toEqual({ error: "not_found" });
 
+    const teams = await app.inject({
+      method: "GET",
+      url: "/api/v1/sports/nba/teams",
+    });
+    expect(teams.statusCode).toBe(200);
+    expect(teams.json()).toMatchObject({
+      items: [
+        {
+          format: "sport",
+          provider: "balldontlie-nba",
+          externalId: "2",
+        },
+      ],
+    });
+
+    const follow = await app.inject({
+      method: "POST",
+      url: "/api/v1/sports/nba/teams/2/follow",
+    });
+    expect(follow.statusCode).toBe(201);
+    expect(follow.json()).toMatchObject({
+      entity: { name: "Boston Celtics", format: "sport" },
+    });
+
+    const tracking = await app.inject({
+      method: "GET",
+      url: "/api/v1/sports/nba/tracking",
+    });
+    expect(tracking.statusCode).toBe(200);
+    expect(tracking.json()).toMatchObject({
+      items: [{ entity: { name: "Boston Celtics", format: "sport" } }],
+    });
+
     await app.close();
   });
 
   it("serves the web application for client-side routes", async () => {
     const app = await testApp();
 
-    for (const url of ["/anime/upcoming", "/settings"]) {
+    for (const url of [
+      "/anime/upcoming",
+      "/sports/nba/teams",
+      "/sports/nba/tracking",
+      "/settings",
+    ]) {
       const response = await app.inject({ method: "GET", url });
       expect(response.statusCode).toBe(200);
       expect(response.headers["content-type"]).toContain("text/html");
@@ -89,7 +128,10 @@ async function testApp() {
   return createApp({
     database,
     providers,
-    discoveryService: new DiscoveryService(database, provider),
+    discoveryService: new DiscoveryService(database, [
+      provider,
+      new FakeNbaCatalogProvider(),
+    ]),
     settingsService: new SettingsService(
       database,
       databasePath,
@@ -100,6 +142,33 @@ async function testApp() {
     syncCoordinator: new SyncCoordinator(database, providers, trackingService),
     webRoot,
   });
+}
+
+class FakeNbaCatalogProvider implements CatalogProvider {
+  readonly id = "balldontlie-nba";
+  readonly format = "sport" as const;
+
+  async discover(): Promise<NormalizedEntity[]> {
+    return [this.entity];
+  }
+
+  async getEntity(): Promise<NormalizedEntity> {
+    return this.entity;
+  }
+
+  private readonly entity: NormalizedEntity = {
+    format: "sport",
+    name: "Boston Celtics",
+    provider: "balldontlie-nba",
+    externalId: "2",
+    coverUrl: null,
+    iconUrl: null,
+    externalUrl: null,
+    metadata: {
+      abbreviation: "BOS",
+      competition: { id: "nba", name: "NBA", sport: "basketball" },
+    },
+  };
 }
 
 class FakeAnimeProvider implements Provider {

@@ -11,6 +11,7 @@ import { ProviderRequestError } from "../../models/provider.js";
 import { SyncCoordinator } from "../../application/tracking/sync-coordinator.js";
 import { TrackingService } from "../../application/tracking/tracking-service.js";
 import { DiscoveryService } from "../../application/discovery/discovery-service.js";
+import { NbaTeamIdentityService } from "../../application/sports/nba-team-identity-service.js";
 import {
   ProviderHealthTargetNotFoundError,
   SettingsService,
@@ -24,6 +25,7 @@ interface AppDependencies {
   settingsService: SettingsService;
   trackingService: TrackingService;
   syncCoordinator: SyncCoordinator;
+  nbaTeamIdentityService?: NbaTeamIdentityService;
   webRoot?: string;
 }
 
@@ -34,6 +36,7 @@ export async function createApp({
   settingsService,
   trackingService,
   syncCoordinator,
+  nbaTeamIdentityService,
   webRoot: configuredWebRoot,
 }: AppDependencies): Promise<FastifyInstance> {
   const app = fastify({ logger: true });
@@ -103,6 +106,68 @@ export async function createApp({
         stale: result.stale,
         updatedAt: result.updatedAt,
       },
+    };
+  });
+
+  app.get("/api/v1/sports/nba/teams", async (request) => {
+    const { search } = request.query as { search?: string };
+    const result = await discoveryService.discoverCached(
+      "sport",
+      { kind: search?.trim() ? "search" : "current", search },
+      6 * 60 * 60 * 1000,
+    );
+    const identity = nbaTeamIdentityService?.enrich(result.items);
+    return {
+      items: identity?.items ?? result.items,
+      meta: {
+        source: result.source,
+        stale: result.stale,
+        updatedAt: result.updatedAt,
+        ...(identity ? { assets: identity.coverage } : {}),
+      },
+    };
+  });
+
+  app.post(
+    "/api/v1/sports/nba/teams/:externalId/follow",
+    async (request, reply) => {
+      const { externalId } = request.params as { externalId: string };
+      if (!externalId.trim()) {
+        return reply.code(400).send({
+          error: "invalid_request",
+          message: "externalId is required",
+        });
+      }
+      const entity = await discoveryService.getEntity(
+        "sport",
+        "balldontlie-nba",
+        externalId,
+      );
+      return reply.code(201).send(await trackingService.trackEntity(entity));
+    },
+  );
+
+  app.get("/api/v1/sports/nba/tracking", async () => {
+    const items = trackingService
+      .listTracked("sport")
+      .filter(
+        (item) =>
+          item.entity.provider === "balldontlie-nba" &&
+          (item.entity.metadata?.competition as { id?: string } | undefined)
+            ?.id === "nba",
+      );
+    const identity = nbaTeamIdentityService?.enrich(
+      items.map((item) => item.entity),
+    );
+    const identities = new Map(
+      identity?.items.map((item) => [item.externalId, item]) ?? [],
+    );
+
+    return {
+      items: items.map((item) => ({
+        ...item,
+        entity: { ...item.entity, ...identities.get(item.entity.externalId) },
+      })),
     };
   });
 

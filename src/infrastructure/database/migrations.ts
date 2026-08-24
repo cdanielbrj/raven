@@ -122,6 +122,42 @@ const migrations: Migration[] = [
       );
     `,
   },
+  {
+    id: "004_event_participants",
+    sql: `
+      CREATE TABLE event_participants (
+        event_id TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+        entity_id TEXT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,
+        role TEXT NOT NULL,
+        PRIMARY KEY (event_id, entity_id)
+      );
+
+      CREATE INDEX event_participants_by_entity
+        ON event_participants (entity_id, event_id);
+
+      INSERT INTO event_participants (event_id, entity_id, role)
+      SELECT id, entity_id, 'subject' FROM events;
+    `,
+  },
+  {
+    id: "005_entity_assets",
+    sql: `
+      CREATE TABLE entity_assets (
+        entity_provider TEXT NOT NULL,
+        entity_external_id TEXT NOT NULL,
+        asset_provider TEXT NOT NULL,
+        source_external_id TEXT,
+        icon_url TEXT,
+        logo_url TEXT,
+        banner_url TEXT,
+        fetched_at TEXT NOT NULL,
+        PRIMARY KEY (entity_provider, entity_external_id, asset_provider)
+      );
+
+      CREATE INDEX entity_assets_by_provider
+        ON entity_assets (asset_provider, fetched_at DESC);
+    `,
+  },
 ];
 
 export function applyMigrations(database: Database.Database): void {

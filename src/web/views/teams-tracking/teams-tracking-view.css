@@ -1,0 +1,27 @@
+.teams-tracking-intro {
+  max-width: 38rem;
+  margin-top: 0.75rem;
+  color: #a9b0be;
+}
+
+.teams-tracking-page > .eyebrow {
+  color: #ed7373;
+  font-family: Righteous, ui-sans-serif, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.teams-tracking-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 3.25rem 2.35rem;
+  margin-top: 3rem;
+}
+
+@media (max-width: 40rem) {
+  .teams-tracking-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.25rem 1.25rem;
+  }
+}

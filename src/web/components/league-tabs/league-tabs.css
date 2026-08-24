@@ -1,0 +1,25 @@
+.league-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin: 1.75rem 0 1.1rem;
+  border-bottom: 1px solid #343a4c;
+}
+
+.league-tab {
+  padding: 0.65rem 0.15rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #8e95a5;
+  font: inherit;
+  font-family: Syne, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.league-tab.active {
+  border-bottom-color: #ad9af8;
+  color: #eeeaff;
+}
