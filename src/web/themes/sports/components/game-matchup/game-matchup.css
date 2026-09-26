@@ -1,0 +1,15 @@
+.game-matchup {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #f3f5ef;
+  font-size: 1.35rem;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.game-matchup-at {
+  color: #b5c0b7;
+  font-size: 0.75rem;
+  font-weight: 500;
+}

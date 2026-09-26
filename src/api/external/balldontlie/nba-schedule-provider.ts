@@ -111,7 +111,10 @@ export class BallDontLieNbaProvider implements CatalogProvider {
     return normalizeEntity(team);
   }
 
-  async listSeasonGames(season: number): Promise<NbaGame[]> {
+  async listSeasonGames(
+    season: number,
+    teamExternalIds: string[] = [],
+  ): Promise<NbaGame[]> {
     if (!Number.isInteger(season) || season < 1946) {
       throw new BallDontLieNbaProviderError(
         "NBA season must be a four digit start year",
@@ -123,11 +126,15 @@ export class BallDontLieNbaProvider implements CatalogProvider {
     let cursor: number | undefined;
 
     do {
-      const page = await this.request<BallDontLieGame>("games", {
+      const query: Record<string, string | string[]> = {
         "seasons[]": String(season),
         per_page: "100",
         ...(cursor === undefined ? {} : { cursor: String(cursor) }),
-      });
+      };
+      if (teamExternalIds.length > 0) {
+        query["team_ids[]"] = teamExternalIds;
+      }
+      const page = await this.request<BallDontLieGame>("games", query);
       games.push(...page.data.map(normalizeGame));
 
       const nextCursor = page.meta?.next_cursor;
@@ -144,11 +151,15 @@ export class BallDontLieNbaProvider implements CatalogProvider {
 
   private async request<T>(
     pathname: string,
-    query: Record<string, string> = {},
+    query: Record<string, string | string[]> = {},
   ): Promise<BallDontLiePage<T>> {
     const url = new URL(pathname, `${this.apiEndpoint}/`);
     for (const [key, value] of Object.entries(query)) {
-      url.searchParams.set(key, value);
+      if (Array.isArray(value)) {
+        for (const item of value) url.searchParams.append(key, item);
+      } else {
+        url.searchParams.set(key, value);
+      }
     }
 
     let response: Response;

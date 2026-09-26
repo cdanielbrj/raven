@@ -2,13 +2,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { ProviderRegistry } from "../src/application/tracking/provider-registry.js";
+import { ProviderRegistry } from "../src/application/core/tracking/provider-registry.js";
 import type {
   NormalizedEntity,
   NormalizedEvent,
   Provider,
 } from "../src/models/provider.js";
-import { TrackingService } from "../src/application/tracking/tracking-service.js";
+import { TrackingService } from "../src/application/core/tracking/tracking-service.js";
 import { openDatabase } from "../src/infrastructure/database/database.js";
 
 const temporaryDirectories: string[] = [];
@@ -36,7 +36,10 @@ describe("TrackingService", () => {
     expect(tracked.entity.name).toBe("Example Anime");
     expect(tracked.nextEvent?.episodeNumber).toBe(1);
     expect(tracked.syncStatus).toBe("synced");
-    const [timelineEvent] = service.listTimeline();
+    const [timelineEvent] = service.listTimeline(
+      undefined,
+      new Date(tracked.nextEvent!.startsAt!),
+    );
     expect(timelineEvent.entity.metadata).toMatchObject({
       bannerImage: "https://example.test/banner.jpg",
       trailer: { id: "example-trailer", site: "youtube" },

@@ -190,6 +190,8 @@ export class TrackingService {
     const weekEndIso = weekEnd.toISOString();
     const weekStartDay = weekStartIso.slice(0, 10);
     const weekEndDay = weekEndIso.slice(0, 10);
+    const rangeStart = format === "sport" ? now.toISOString() : weekStartIso;
+    const rangeStartDay = rangeStart.slice(0, 10);
     const rows = this.database
       .prepare(
         `
@@ -213,14 +215,15 @@ export class TrackingService {
     `,
       )
       .all(
-        weekStartIso,
-        weekStartDay,
+        rangeStart,
+        rangeStartDay,
         weekEndIso,
         weekEndDay,
         ...(format ? [format] : []),
       ) as Record<string, unknown>[];
 
-    return rows.map((row) => ({
+    const uniqueRows = [...new Map(rows.map((row) => [row.id, row])).values()];
+    return uniqueRows.map((row) => ({
       ...eventFromRow(row),
       entity: {
         id: row.entity_id as string,

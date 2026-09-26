@@ -1,0 +1,34 @@
+.game-calendar-card {
+  position: relative;
+  display: flex;
+  min-height: 7rem;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem;
+  overflow: hidden;
+  border: 1px solid rgba(139, 184, 148, 0.24);
+  border-radius: 0.55rem;
+  background: #1d2b23;
+}
+
+.game-calendar-card > .game-matchup {
+  font-size: 1.15rem;
+}
+
+.game-calendar-copy h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.game-calendar-copy p,
+.game-calendar-copy time {
+  font-size: 0.72rem;
+}
+
+.game-calendar-copy time {
+  display: block;
+  margin-top: 0.25rem;
+  color: #c3d5c6;
+}

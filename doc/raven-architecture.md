@@ -4,12 +4,12 @@
 >
 > Raven observes external entertainment sources, normalizes relevant information, lets the user decide what deserves attention, and presents upcoming events in a concise chronological hub.
 
-**Status:** Architecture draft for v0.1
+**Status:** Architecture baseline, updated through v0.2
 **Primary deployment:** Docker
 **Persistence:** SQLite
 **Primary interface:** Responsive Web UI
-**Initial domain:** Anime
-**Planned next domain:** Sports
+**Initial domain:** Anime (implemented)
+**First additional domain:** NBA Sports pilot (implemented in v0.2)
 
 ---
 
@@ -237,11 +237,27 @@ AniList is the preferred first Anime provider because it can expose public catal
 
 The provider implementation is replaceable and must remain behind the provider contract.
 
-## 4.2 Planned next domain: Sports
+## 4.2 First additional domain: NBA Sports pilot (v0.2)
 
-Sports is the first major validation that Raven's domain model is provider-independent.
+Sports is the first major validation that Raven's domain model is
+provider-independent. The pilot uses NBA games, where each event has two team
+participants and belongs to the league schedule.
 
-Sports introduces different event types and potentially entity-level preferences, for example:
+BALLDONTLIE supplies the NBA team catalog and schedule. TheSportsDB is an
+optional source of team artwork only; it does not supply schedule data.
+NBA Upcoming requests and persists only games involving followed teams, and
+shows the current week's remaining games. A week without games has an explicit
+empty state rather than displaying games from a future week.
+
+Application code is grouped by ownership:
+
+- `application/core`: format-independent Discovery, Settings and Tracking.
+- `application/sports/nba`: NBA schedule and team-identity use cases.
+- `application/anime`: reserved for application behavior exclusive to Anime;
+  AniList and MyAnimeList HTTP adapters remain under `api/external`.
+
+The sports model can later support different event types and entity-level
+preferences, for example:
 
 ```text
 Formula 1
@@ -251,7 +267,7 @@ Formula 1
 └── Practice      ✗
 ```
 
-The sports provider itself does **not** need to be selected or implemented in v0.1.
+The v0.2 NBA pilot does not imply support for other leagues or sports providers.
 
 Provider selection should prioritize:
 
@@ -1590,6 +1606,15 @@ A practical implementation order:
 5. startup recovery;
 6. provider failure states;
 7. tests.
+
+### Phase 6 — NBA Sports pilot (v0.2, implemented)
+
+1. BALLDONTLIE team discovery and team-scoped schedule retrieval;
+2. persistence of NBA games with home and away participants;
+3. NBA Upcoming limited to followed teams and the current week;
+4. sports-specific views and components under `themes/sports`;
+5. shared Raven UI components under `themes/raven` and Anime components under
+  `themes/anime`.
 
 ---
 

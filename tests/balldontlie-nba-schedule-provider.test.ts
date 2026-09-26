@@ -78,11 +78,12 @@ describe("BallDontLieNbaProvider", () => {
     };
     const provider = new BallDontLieNbaProvider("api-key", fetcher);
 
-    const games = await provider.listSeasonGames(2026);
+    const games = await provider.listSeasonGames(2026, ["2", "14"]);
 
     expect(requests).toHaveLength(2);
     expect(requests[0].pathname).toBe("/v1/games");
     expect(requests[0].searchParams.get("seasons[]")).toBe("2026");
+    expect(requests[0].searchParams.getAll("team_ids[]")).toEqual(["2", "14"]);
     expect(requests[0].searchParams.get("per_page")).toBe("100");
     expect(requests[1].searchParams.get("cursor")).toBe("100");
     expect(games).toEqual([

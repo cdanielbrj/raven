@@ -1,4 +1,5 @@
 import "./calendar-day.css";
+import type { ReactNode } from "react";
 import { formatCalendarDay, isTodayDate } from "../../helpers/formatters";
 import { CalendarCard } from "../card-calendar/card-calendar";
 import type { TimelineEvent } from "../../types";
@@ -6,9 +7,11 @@ import type { TimelineEvent } from "../../types";
 export function CalendarDay({
   day,
   events,
+  renderEvent,
 }: {
   day: Date;
   events: TimelineEvent[];
+  renderEvent?: (event: TimelineEvent) => ReactNode;
 }) {
   const today = isTodayDate(day);
   return (
@@ -25,7 +28,13 @@ export function CalendarDay({
       </header>
       <div className="calendar-events motion-list">
         {events.length ? (
-          events.map((event) => <CalendarCard event={event} key={event.id} />)
+          events.map((event) =>
+            renderEvent ? (
+              <span key={event.id}>{renderEvent(event)}</span>
+            ) : (
+              <CalendarCard event={event} key={event.id} />
+            ),
+          )
         ) : (
           <p className="calendar-empty">No events</p>
         )}

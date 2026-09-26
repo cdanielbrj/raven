@@ -65,6 +65,10 @@ export interface MediaMetadata {
     provider: string;
     externalId: string;
   };
+  homeTeam?: { name: string; abbreviation: string };
+  awayTeam?: { name: string; abbreviation: string };
+  postponed?: boolean;
+  postseason?: boolean;
 }
 
 export interface Entity {
@@ -95,10 +99,13 @@ export interface DiscoveryResponse {
 
 export interface TimelineEvent {
   id: string;
+  name: string | null;
   type: string;
+  format: string;
   episodeNumber: number | null;
   startsAt: string | null;
   startsOn: string | null;
+  metadata: MediaMetadata | null;
   entity: {
     name: string;
     format: string;

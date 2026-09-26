@@ -94,6 +94,39 @@
   height: 2.4rem;
 }
 
+.featured-event-sport {
+  grid-template-columns: 1fr;
+  border-color: #46594d;
+  background: #19231e;
+}
+
+.featured-event-sport .featured-details {
+  min-height: 17rem;
+  align-items: center;
+  background: #1d2b23;
+}
+
+.featured-event-sport .featured-details::after {
+  background: linear-gradient(90deg, rgba(10, 18, 13, 0.5), transparent 82%);
+}
+
+.featured-event-sport .game-matchup {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  font-size: 2rem;
+}
+
+.featured-event-sport .featured-copy > p {
+  color: #c8d8cb;
+}
+
+.featured-event-sport .featured-footer time {
+  color: #c3d5c6;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
 @media (max-width: 48rem) {
   .next-event.featured-event {
     grid-template-columns: 1fr;
@@ -106,5 +139,16 @@
 
   .featured-copy h2 {
     font-size: 1.3rem;
+  }
+
+  .featured-event-sport .featured-details {
+    min-height: 15rem;
+    aspect-ratio: auto;
+  }
+
+  .featured-event-sport .game-matchup {
+    top: 1.25rem;
+    left: 1rem;
+    font-size: 1.5rem;
   }
 }

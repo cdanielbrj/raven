@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { SettingsService } from "../src/application/settings/settings-service.js";
+import { SettingsService } from "../src/application/core/settings/settings-service.js";
 import { openDatabase } from "../src/infrastructure/database/database.js";
 
 const directories: string[] = [];

@@ -20,7 +20,7 @@ export function navigationItemsFor(
   return [
     { label: "Overview" },
     { label: "Calendar" },
-    { label: "Upcoming" },
+    { label: "Upcoming", to: "/sports/nba/upcoming" },
     { label: "Teams", to: "/sports/nba/teams" },
     { label: "Tracking", to: "/sports/nba/tracking" },
     { label: "Settings", to: "/settings" },

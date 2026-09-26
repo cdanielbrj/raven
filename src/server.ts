@@ -2,15 +2,16 @@ import { createApp } from "./api/internal/app.js";
 import { BallDontLieNbaProvider } from "./api/external/balldontlie/nba-schedule-provider.js";
 import { TheSportsDbTeamIdentityProvider } from "./api/external/thesportsdb/team-identity-provider.js";
 import { MalCatalogProvider } from "./api/external/mal/mal-catalog-provider.js";
-import { DiscoveryService } from "./application/discovery/discovery-service.js";
+import { DiscoveryService } from "./application/core/discovery/discovery-service.js";
 import { loadConfig } from "./infrastructure/config.js";
 import { openDatabase } from "./infrastructure/database/database.js";
 import { AniListProvider } from "./api/external/anilist/anilist-provider.js";
-import { ProviderRegistry } from "./application/tracking/provider-registry.js";
-import { SyncCoordinator } from "./application/tracking/sync-coordinator.js";
-import { TrackingService } from "./application/tracking/tracking-service.js";
-import { SettingsService } from "./application/settings/settings-service.js";
-import { NbaTeamIdentityService } from "./application/sports/nba-team-identity-service.js";
+import { ProviderRegistry } from "./application/core/tracking/provider-registry.js";
+import { SyncCoordinator } from "./application/core/tracking/sync-coordinator.js";
+import { TrackingService } from "./application/core/tracking/tracking-service.js";
+import { SettingsService } from "./application/core/settings/settings-service.js";
+import { NbaTeamIdentityService } from "./application/sports/nba/nba-team-identity-service.js";
+import { NbaScheduleService } from "./application/sports/nba/nba-schedule-service.js";
 
 const config = loadConfig();
 const database = openDatabase(config.databasePath);
@@ -31,6 +32,9 @@ const discoveryService = new DiscoveryService(database, [
   ...(ballDontLieNbaProvider ? [ballDontLieNbaProvider] : []),
 ]);
 const trackingService = new TrackingService(database, providers);
+const nbaScheduleService = ballDontLieNbaProvider
+  ? new NbaScheduleService(database, ballDontLieNbaProvider, trackingService)
+  : undefined;
 const app = await createApp({
   database,
   providers,
@@ -86,6 +90,7 @@ const app = await createApp({
     database,
     teamIdentityProvider,
   ),
+  nbaScheduleService,
 });
 
 const close = async (signal: string): Promise<void> => {

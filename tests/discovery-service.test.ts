@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { DiscoveryService } from "../src/application/discovery/discovery-service.js";
+import { DiscoveryService } from "../src/application/core/discovery/discovery-service.js";
 import { openDatabase } from "../src/infrastructure/database/database.js";
 import {
   ProviderRequestError,

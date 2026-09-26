@@ -1,0 +1,8 @@
+.theme-sports {
+  --calendar-accent: #aac9b0;
+  --calendar-accent-strong: #e1ede3;
+  --calendar-border: rgba(139, 184, 148, 0.2);
+  --calendar-panel: rgba(29, 43, 35, 0.48);
+  --calendar-rail: rgba(139, 184, 148, 0.22);
+  --calendar-marker-background: #111813;
+}

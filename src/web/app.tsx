@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router";
 import { request } from "./api";
-import { Navbar } from "./layout/navbar/navbar";
-import { DiscoveryView } from "./views/discovery/discovery-view";
-import { SettingsView } from "./views/settings/settings-view";
-import { TrackingView } from "./views/tracking/tracking-view";
-import { TeamsTrackingView } from "./views/teams-tracking/teams-tracking-view";
-import { TeamsView } from "./views/teams/teams-view";
-import { UpcomingView } from "./views/upcoming/upcoming-view";
+import { Navbar } from "./themes/raven/components/navbar/navbar";
+import { DiscoveryView } from "./views/anime/discovery/discovery-view";
+import { TrackingView } from "./views/anime/tracking/tracking-view";
+import { AnimeUpcomingView } from "./views/anime/upcoming/upcoming-view";
+import { SettingsView } from "./views/raven/settings/settings-view";
+import { TeamsTrackingView } from "./views/sports/teams-tracking/teams-tracking-view";
+import { TeamsView } from "./views/sports/teams/teams-view";
+import { SportsUpcomingView } from "./views/sports/upcoming/upcoming-view";
 import type { TrackedItem } from "./types";
 
 export function App() {
@@ -39,10 +40,11 @@ export function App() {
           path="/:format/upcoming"
           element={
             <AnimeRoute>
-              <UpcomingView />
+              <AnimeUpcomingView />
             </AnimeRoute>
           }
         />
+        <Route path="/sports/nba/upcoming" element={<SportsUpcomingView />} />
         <Route
           path="/:format/discovery"
           element={

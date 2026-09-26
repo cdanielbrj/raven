@@ -8,40 +8,75 @@ import { ErrorMessage } from "../../states/error-message/error-message";
 import type { TimelineEvent } from "../../types";
 import "./upcoming-view.css";
 
-export function UpcomingView() {
+export function UpcomingView({ format }: { format: "anime" | "sport" }) {
   const [items, setItems] = useState<TimelineEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    void request<{ items: TimelineEvent[] }>("/api/v1/upcoming?format=anime")
-      .then((data) => setItems(data.items))
-      .catch((reason: Error) => setError(reason.message));
-  }, []);
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      if (format === "sport") {
+        try {
+          await request("/api/v1/sports/nba/refresh", { method: "POST" });
+        } catch (reason) {
+          setError(
+            reason instanceof Error
+              ? reason.message
+              : "Could not refresh schedule",
+          );
+        }
+      }
+      try {
+        const data = await request<{ items: TimelineEvent[] }>(
+          `/api/v1/upcoming?format=${format}`,
+        );
+        setItems(data.items);
+      } catch (reason) {
+        setError(
+          reason instanceof Error
+            ? reason.message
+            : "Could not load upcoming events",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    void load();
+  }, [format]);
 
   const nextEvent = items.find(isFutureEvent);
   const thisWeek = calendarWeekStart();
 
   return (
     <section className="page home-page">
-      <p className="eyebrow">UPCOMING</p>
-      <h1>What matters next.</h1>
+      <p className="eyebrow">{format === "sport" ? "NBA" : "UPCOMING"}</p>
+      <h1>{format === "sport" ? "Your teams, next." : "What matters next."}</h1>
       {error && <ErrorMessage message={error} />}
-      {!error && items.length === 0 && (
+      {!error && !loading && items.length === 0 && (
         <EmptyState
           title="Nothing on the timeline"
-          detail="Track an anime in Discovery and its upcoming episodes will appear here."
+          detail={
+            format === "sport"
+              ? "No games are scheduled for your followed teams this week."
+              : "Track an anime in Discovery and its upcoming episodes will appear here."
+          }
         />
       )}
+      {loading && <p className="muted">Loading upcoming events…</p>}
       {nextEvent && (
         <>
           <p className="section-label">{nextSectionLabel(nextEvent)}</p>
           <HeroHighlight event={nextEvent} />
         </>
       )}
-      <div className="week">
-        <p className="section-label">This week</p>
-        <Calendar start={thisWeek} events={items} />
-      </div>
+      {!loading && items.length > 0 && (
+        <div className="week">
+          <p className="section-label">This week</p>
+          <Calendar start={thisWeek} events={items} />
+        </div>
+      )}
     </section>
   );
 }

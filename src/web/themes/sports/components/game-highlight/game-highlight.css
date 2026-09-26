@@ -1,0 +1,38 @@
+.game-highlight {
+  display: grid;
+  min-height: 15rem;
+  align-content: space-between;
+  gap: 2rem;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border: 1px solid rgba(139, 184, 148, 0.28);
+  border-radius: 0.75rem;
+  background: #1d2b23;
+}
+
+.game-highlight > .game-matchup {
+  gap: 1rem;
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+}
+
+.game-highlight-copy {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.game-highlight-copy p {
+  color: #b9cbbd;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.game-highlight-copy h2 {
+  max-width: 32ch;
+  margin: 0;
+  font-size: clamp(1.3rem, 2.5vw, 2rem);
+  line-height: 1.1;
+}
+
+.game-highlight-copy time {
+  color: #c3d5c6;
+}

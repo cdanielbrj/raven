@@ -71,6 +71,11 @@ export function nextSectionLabel(event: TimelineEvent): string {
   }).format(eventDate(event))}`;
 }
 
+export function isFutureEvent(event: TimelineEvent): boolean {
+  const value = event.startsAt ?? `${event.startsOn}T23:59:59`;
+  return new Date(value).getTime() >= Date.now();
+}
+
 export function isInThisCalendarWeek(event: TimelineEvent): boolean {
   const now = new Date();
   const endOfWeek = new Date(now);

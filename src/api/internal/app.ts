@@ -6,16 +6,17 @@ import { formats, type Format } from "../../models/media.js";
 import {
   ProviderNotRegisteredError,
   ProviderRegistry,
-} from "../../application/tracking/provider-registry.js";
+} from "../../application/core/tracking/provider-registry.js";
 import { ProviderRequestError } from "../../models/provider.js";
-import { SyncCoordinator } from "../../application/tracking/sync-coordinator.js";
-import { TrackingService } from "../../application/tracking/tracking-service.js";
-import { DiscoveryService } from "../../application/discovery/discovery-service.js";
-import { NbaTeamIdentityService } from "../../application/sports/nba-team-identity-service.js";
+import { SyncCoordinator } from "../../application/core/tracking/sync-coordinator.js";
+import { TrackingService } from "../../application/core/tracking/tracking-service.js";
+import { DiscoveryService } from "../../application/core/discovery/discovery-service.js";
+import { NbaTeamIdentityService } from "../../application/sports/nba/nba-team-identity-service.js";
+import { NbaScheduleService } from "../../application/sports/nba/nba-schedule-service.js";
 import {
   ProviderHealthTargetNotFoundError,
   SettingsService,
-} from "../../application/settings/settings-service.js";
+} from "../../application/core/settings/settings-service.js";
 import { InvalidRequestError } from "./request-validation.js";
 
 interface AppDependencies {
@@ -26,6 +27,7 @@ interface AppDependencies {
   trackingService: TrackingService;
   syncCoordinator: SyncCoordinator;
   nbaTeamIdentityService?: NbaTeamIdentityService;
+  nbaScheduleService?: NbaScheduleService;
   webRoot?: string;
 }
 
@@ -37,6 +39,7 @@ export async function createApp({
   trackingService,
   syncCoordinator,
   nbaTeamIdentityService,
+  nbaScheduleService,
   webRoot: configuredWebRoot,
 }: AppDependencies): Promise<FastifyInstance> {
   const app = fastify({ logger: true });
@@ -171,6 +174,13 @@ export async function createApp({
     };
   });
 
+  app.post("/api/v1/sports/nba/refresh", async () => {
+    if (!nbaScheduleService) {
+      throw new ProviderNotRegisteredError("sport", "balldontlie-nba");
+    }
+    return nbaScheduleService.refresh();
+  });
+
   app.get("/api/v1/tracking", async (request, reply) => {
     const formatValue = (request.query as { format?: string }).format;
     const format = resolveOptionalFormat(formatValue, reply);
@@ -231,7 +241,11 @@ export async function createApp({
     const formatValue = (request.query as { format?: string }).format;
     const format = resolveOptionalFormat(formatValue, reply);
     if (formatValue && !format) return;
-    return { items: trackingService.listTimeline(format) };
+    const items =
+      format === "sport"
+        ? (nbaScheduleService?.listUpcoming() ?? [])
+        : trackingService.listTimeline(format);
+    return { items };
   });
 
   app.post("/api/v1/events/:eventId/watched", async (request, reply) => {

@@ -3,11 +3,13 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/api/internal/app.js";
-import { DiscoveryService } from "../src/application/discovery/discovery-service.js";
-import { SettingsService } from "../src/application/settings/settings-service.js";
-import { ProviderRegistry } from "../src/application/tracking/provider-registry.js";
-import { SyncCoordinator } from "../src/application/tracking/sync-coordinator.js";
-import { TrackingService } from "../src/application/tracking/tracking-service.js";
+import { BallDontLieNbaProvider } from "../src/api/external/balldontlie/nba-schedule-provider.js";
+import { DiscoveryService } from "../src/application/core/discovery/discovery-service.js";
+import { NbaScheduleService } from "../src/application/sports/nba/nba-schedule-service.js";
+import { SettingsService } from "../src/application/core/settings/settings-service.js";
+import { ProviderRegistry } from "../src/application/core/tracking/provider-registry.js";
+import { SyncCoordinator } from "../src/application/core/tracking/sync-coordinator.js";
+import { TrackingService } from "../src/application/core/tracking/tracking-service.js";
 import { openDatabase } from "../src/infrastructure/database/database.js";
 import type { CatalogProvider } from "../src/models/catalog.js";
 import type {
@@ -87,6 +89,20 @@ describe("HTTP contracts", () => {
       items: [{ entity: { name: "Boston Celtics", format: "sport" } }],
     });
 
+    const refresh = await app.inject({
+      method: "POST",
+      url: "/api/v1/sports/nba/refresh",
+    });
+    expect(refresh.statusCode).toBe(200);
+    expect(refresh.json()).toEqual({ refreshed: 0 });
+
+    const upcoming = await app.inject({
+      method: "GET",
+      url: "/api/v1/upcoming?format=sport",
+    });
+    expect(upcoming.statusCode).toBe(200);
+    expect(upcoming.json()).toEqual({ items: [] });
+
     await app.close();
   });
 
@@ -95,6 +111,7 @@ describe("HTTP contracts", () => {
 
     for (const url of [
       "/anime/upcoming",
+      "/sports/nba/upcoming",
       "/sports/nba/teams",
       "/sports/nba/tracking",
       "/settings",
@@ -140,6 +157,18 @@ async function testApp() {
     ),
     trackingService,
     syncCoordinator: new SyncCoordinator(database, providers, trackingService),
+    nbaScheduleService: new NbaScheduleService(
+      database,
+      new BallDontLieNbaProvider(
+        "api-key",
+        async () =>
+          new Response(JSON.stringify({ data: [] }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+      ),
+      trackingService,
+    ),
     webRoot,
   });
 }

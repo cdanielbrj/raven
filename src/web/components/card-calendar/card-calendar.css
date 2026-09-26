@@ -35,6 +35,25 @@
   -webkit-line-clamp: 2;
 }
 
+.calendar-event .timeline-event-sport {
+  aspect-ratio: 4 / 3;
+  border-color: #46594d;
+  background: #1d2b23;
+}
+
+.calendar-event .timeline-event-sport > .game-matchup {
+  position: absolute;
+  top: 1rem;
+  left: 0.75rem;
+  gap: 0.45rem;
+  font-size: 1.15rem;
+}
+
+.calendar-event .timeline-event-sport .timeline-copy {
+  padding-top: 3.5rem;
+  background: linear-gradient(transparent, rgba(10, 16, 12, 0.9));
+}
+
 .calendar-event .timeline-episode,
 .calendar-event .calendar-time {
   font-size: 0.72rem;
@@ -68,5 +87,9 @@
 
   .calendar-event .timeline-copy {
     padding-top: 3.2rem;
+  }
+
+  .calendar-event .timeline-event-sport {
+    aspect-ratio: 16 / 9;
   }
 }

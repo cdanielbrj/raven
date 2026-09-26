@@ -1,0 +1,72 @@
+.calendar-event .timeline-event {
+  position: relative;
+  display: block;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border: 1px solid #33394a;
+  border-radius: 0.55rem;
+  background: #202738;
+}
+
+.calendar-event .mini-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.calendar-event .timeline-copy {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  min-height: 0;
+  padding: 3.7rem 0.75rem 0.7rem;
+  background: linear-gradient(transparent, rgba(10, 13, 21, 0.97) 58%);
+}
+
+.calendar-event .timeline-copy h3 {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: clamp(0.8rem, 1vw, 1rem);
+  line-height: 1.18;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.calendar-event .timeline-episode,
+.calendar-event .calendar-time {
+  font-size: 0.72rem;
+}
+
+.calendar-event .calendar-time {
+  display: block;
+  margin-top: 0.15rem;
+  color: #b5a7ff;
+  font-family: Caveat, ui-rounded, cursive;
+  font-weight: 700;
+}
+
+.calendar-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.calendar-footer .watch-provider {
+  position: static;
+  flex: none;
+}
+
+@media (max-width: 40rem) {
+  .calendar-event .timeline-event {
+    aspect-ratio: 16 / 9;
+  }
+
+  .calendar-event .timeline-copy {
+    padding-top: 3.2rem;
+  }
+}

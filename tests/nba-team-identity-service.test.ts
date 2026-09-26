@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { NbaTeamIdentityService } from "../src/application/sports/nba-team-identity-service.js";
+import { NbaTeamIdentityService } from "../src/application/sports/nba/nba-team-identity-service.js";
 import { openDatabase } from "../src/infrastructure/database/database.js";
 import type { EntityAssetProvider } from "../src/models/entity-assets.js";
 import type { NormalizedEntity } from "../src/models/provider.js";

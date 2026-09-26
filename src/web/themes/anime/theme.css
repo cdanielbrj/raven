@@ -1,0 +1,8 @@
+.theme-anime {
+  --calendar-accent: #b5a7ff;
+  --calendar-accent-strong: #eee8ff;
+  --calendar-border: rgba(174, 161, 223, 0.16);
+  --calendar-panel: rgba(22, 27, 39, 0.42);
+  --calendar-rail: rgba(181, 167, 255, 0.18);
+  --calendar-marker-background: #11151f;
+}
