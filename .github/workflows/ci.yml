@@ -25,3 +25,54 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: docker build --tag raven:ci .
+
+  tag:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read release version
+        id: version
+        shell: bash
+        run: |
+          current_version="$(node -p "require('./package.json').version")"
+          previous_version=""
+
+          if git cat-file -e "${GITHUB_SHA}^:package.json" 2>/dev/null; then
+            previous_version="$(git show "${GITHUB_SHA}^:package.json" | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).version')"
+          fi
+
+          echo "tag=v${current_version}" >> "$GITHUB_OUTPUT"
+          echo "changed=$([[ "$current_version" != "$previous_version" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Create annotated version tag
+        if: steps.version.outputs.changed == 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          git fetch --tags --force
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git rev-parse --verify --quiet "refs/tags/${TAG}" >/dev/null; then
+            existing_commit="$(git rev-list -n 1 "$TAG")"
+            if [ "$existing_commit" = "$GITHUB_SHA" ]; then
+              echo "Tag ${TAG} already points to this commit."
+              exit 0
+            fi
+
+            echo "Tag ${TAG} already points to ${existing_commit}, not ${GITHUB_SHA}." >&2
+            exit 1
+          fi
+
+          git tag --annotate "$TAG" --message "Release ${TAG}" "$GITHUB_SHA"
+          git push origin "$TAG"
