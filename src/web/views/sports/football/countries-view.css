@@ -1,0 +1,109 @@
+.football-countries-page {
+  max-width: 58rem;
+}
+
+.selected-countries {
+  margin: 2rem 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid #373d4e;
+  border-radius: 0.45rem;
+  background: #181d28;
+}
+
+.selected-countries-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.selected-countries-heading h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.selected-countries-heading span {
+  color: #ed7373;
+  font-size: 0.8rem;
+}
+
+.selected-country-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.selected-country,
+.country-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.selected-country {
+  padding: 0.45rem 0.55rem 0.45rem 0.7rem;
+  border: 1px solid #c95151;
+  border-radius: 0.35rem;
+  color: #f0ede7;
+}
+
+.selected-country img,
+.country-result img {
+  width: 1.45rem;
+  height: 1rem;
+  object-fit: cover;
+}
+
+.selected-country button {
+  border: 0;
+  padding: 0 0.15rem;
+  background: transparent;
+  color: #ed7373;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.country-dropdown {
+  display: grid;
+  gap: 0.45rem;
+  width: min(100%, 28rem);
+  color: #ed7373;
+  font-family: Righteous, ui-sans-serif, sans-serif;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.country-dropdown input {
+  width: 100%;
+  border: 1px solid #373d4e;
+  border-radius: 0.45rem;
+  padding: 0.75rem 0.85rem;
+  background: #181d28;
+  color: #f0ede7;
+  font: inherit;
+}
+
+.country-results {
+  display: grid;
+  width: min(100%, 28rem);
+  margin-top: 0.45rem;
+  border: 1px solid #373d4e;
+  border-radius: 0.35rem;
+  overflow: hidden;
+}
+
+.country-result {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #2a3040;
+  padding: 0.7rem 0.85rem;
+  background: #181d28;
+  color: #f0ede7;
+  text-align: left;
+  cursor: pointer;
+}
+
+.country-result:hover,
+.country-result:focus-visible {
+  background: #241d27;
+}

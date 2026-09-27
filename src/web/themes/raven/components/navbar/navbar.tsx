@@ -10,19 +10,23 @@ import "./navbar.css";
 export function Navbar({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { pathname } = useLocation();
-  const context = pathname.startsWith("/sports/nba/") ? "nba" : "anime";
+  const context = pathname.startsWith("/sports/football/")
+    ? "football"
+    : pathname.startsWith("/sports/nba/")
+      ? "nba"
+      : "anime";
   const navigationItems = navigationItemsFor(context);
 
   return (
     <div className="raven-layout">
       <header className="raven-navbar">
         <div
-          className={`media-context${context === "nba" ? " media-context-sports" : ""}`}
-          aria-label={`Current media type: ${context === "nba" ? "Sports" : "Anime"}`}
+          className={`media-context${context !== "anime" ? " media-context-sports" : ""}`}
+          aria-label={`Current media type: ${context !== "anime" ? "Sports" : "Anime"}`}
         >
           <span className="media-context-name">RAVEN</span>
           <span className="media-context-type">
-            {context === "nba" ? "Sports" : "Anime"}
+            {context !== "anime" ? "Sports" : "Anime"}
           </span>
         </div>
         <nav className="navbar-navigation" aria-label="Primary navigation">

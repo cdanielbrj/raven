@@ -12,6 +12,10 @@ import { TrackingService } from "./application/core/tracking/tracking-service.js
 import { SettingsService } from "./application/core/settings/settings-service.js";
 import { NbaTeamIdentityService } from "./application/sports/nba/nba-team-identity-service.js";
 import { NbaScheduleService } from "./application/sports/nba/nba-schedule-service.js";
+import {
+  defaultFootballLeagues,
+  TheSportsDbFootballProvider,
+} from "./api/external/thesportsdb/football-provider.js";
 
 const config = loadConfig();
 const database = openDatabase(config.databasePath);
@@ -25,11 +29,21 @@ const ballDontLieNbaProvider = config.ballDontLieApiKey
 const teamIdentityProvider = new TheSportsDbTeamIdentityProvider(
   config.theSportsDbApiKey,
 );
-const providers = new ProviderRegistry([aniListProvider]);
+const footballProvider = config.theSportsDbApiKey
+  ? new TheSportsDbFootballProvider(
+      config.theSportsDbApiKey,
+      defaultFootballLeagues,
+    )
+  : undefined;
+const providers = new ProviderRegistry([
+  aniListProvider,
+  ...(footballProvider ? [footballProvider] : []),
+]);
 const discoveryService = new DiscoveryService(database, [
   aniListProvider,
   ...(malProvider ? [malProvider] : []),
   ...(ballDontLieNbaProvider ? [ballDontLieNbaProvider] : []),
+  ...(footballProvider ? [footballProvider] : []),
 ]);
 const trackingService = new TrackingService(database, providers);
 const nbaScheduleService = ballDontLieNbaProvider
@@ -67,19 +81,10 @@ const app = await createApp({
       },
       {
         id: "thesportsdb",
-        label: "TheSportsDB team assets",
-        configured: true,
+        label: "TheSportsDB football",
+        configured: Boolean(footballProvider),
         check: () =>
-          teamIdentityProvider.resolveEntity({
-            format: "sport",
-            name: "Boston Celtics",
-            provider: "balldontlie-nba",
-            externalId: "2",
-            coverUrl: null,
-            iconUrl: null,
-            externalUrl: null,
-            metadata: null,
-          }),
+          footballProvider?.listFeaturedLeagues() ?? Promise.resolve([]),
       },
     ],
     process.env.npm_package_version ?? "0.1.0",
@@ -91,6 +96,7 @@ const app = await createApp({
     teamIdentityProvider,
   ),
   nbaScheduleService,
+  footballProvider,
 });
 
 const close = async (signal: string): Promise<void> => {

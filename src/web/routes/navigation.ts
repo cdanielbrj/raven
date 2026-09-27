@@ -13,9 +13,20 @@ export const navigationItems: readonly NavigationItem[] = [
 ];
 
 export function navigationItemsFor(
-  context: "anime" | "nba",
+  context: "anime" | "nba" | "football",
 ): readonly NavigationItem[] {
   if (context === "anime") return navigationItems;
+
+  if (context === "football") {
+    return [
+      { label: "Overview" },
+      { label: "Calendar" },
+      { label: "Countries", to: "/sports/football/countries" },
+      { label: "Teams", to: "/sports/football/teams" },
+      { label: "Tracking", to: "/sports/football/tracking" },
+      { label: "Settings", to: "/settings" },
+    ];
+  }
 
   return [
     { label: "Overview" },

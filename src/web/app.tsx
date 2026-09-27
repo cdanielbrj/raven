@@ -9,6 +9,7 @@ import { SettingsView } from "./views/raven/settings/settings-view";
 import { TeamsTrackingView } from "./views/sports/teams-tracking/teams-tracking-view";
 import { TeamsView } from "./views/sports/teams/teams-view";
 import { SportsUpcomingView } from "./views/sports/upcoming/upcoming-view";
+import { CountriesView } from "./views/sports/football/countries-view";
 import type { TrackedItem } from "./types";
 
 export function App() {
@@ -73,10 +74,30 @@ export function App() {
             />
           }
         />
+        <Route path="/sports/football/countries" element={<CountriesView />} />
+        <Route
+          path="/sports/football/teams"
+          element={
+            <TeamsView
+              sport="football"
+              trackedIds={trackedIds.sport}
+              onTracked={() => refreshTracking("sport")}
+            />
+          }
+        />
         <Route
           path="/sports/nba/tracking"
           element={
             <TeamsTrackingView onChanged={() => refreshTracking("sport")} />
+          }
+        />
+        <Route
+          path="/sports/football/tracking"
+          element={
+            <TeamsTrackingView
+              sport="football"
+              onChanged={() => refreshTracking("sport")}
+            />
           }
         />
         <Route

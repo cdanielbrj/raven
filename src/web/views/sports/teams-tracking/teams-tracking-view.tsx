@@ -6,11 +6,17 @@ import { ErrorMessage } from "../../../themes/raven/components/error-message/err
 import type { TrackedItem } from "../../../types";
 import "./teams-tracking-view.css";
 
+type SportsKind = "nba" | "football";
+
 export function TeamsTrackingView({
   onChanged,
+  sport = "nba",
 }: {
   onChanged: () => Promise<unknown>;
+  sport?: SportsKind;
 }) {
+  const isFootball = sport === "football";
+  const label = isFootball ? "Football" : "NBA";
   const [items, setItems] = useState<TrackedItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<string | null>(null);
@@ -19,7 +25,9 @@ export function TeamsTrackingView({
     setError(null);
     try {
       const data = await request<{ items: TrackedItem[] }>(
-        "/api/v1/sports/nba/tracking",
+        isFootball
+          ? "/api/v1/sports/football/tracking"
+          : "/api/v1/sports/nba/tracking",
       );
       setItems(data.items);
     } catch (reason) {
@@ -52,7 +60,7 @@ export function TeamsTrackingView({
 
   return (
     <section className="page teams-tracking-page theme-sports">
-      <p className="eyebrow">NBA</p>
+      <p className="eyebrow">{label}</p>
       <h1>Your teams.</h1>
       <p className="teams-tracking-intro">
         The teams you follow are ready to appear in upcoming events.
@@ -61,7 +69,7 @@ export function TeamsTrackingView({
       {items.length === 0 && !error ? (
         <EmptyState
           title="No teams followed yet"
-          detail="Choose NBA teams in Teams to add them here."
+          detail={`Choose ${label} teams in Teams to add them here.`}
         />
       ) : (
         <div className="teams-tracking-grid motion-list">

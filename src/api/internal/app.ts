@@ -13,6 +13,7 @@ import { TrackingService } from "../../application/core/tracking/tracking-servic
 import { DiscoveryService } from "../../application/core/discovery/discovery-service.js";
 import { NbaTeamIdentityService } from "../../application/sports/nba/nba-team-identity-service.js";
 import { NbaScheduleService } from "../../application/sports/nba/nba-schedule-service.js";
+import { TheSportsDbFootballProvider } from "../external/thesportsdb/football-provider.js";
 import {
   ProviderHealthTargetNotFoundError,
   SettingsService,
@@ -28,6 +29,7 @@ interface AppDependencies {
   syncCoordinator: SyncCoordinator;
   nbaTeamIdentityService?: NbaTeamIdentityService;
   nbaScheduleService?: NbaScheduleService;
+  footballProvider?: TheSportsDbFootballProvider;
   webRoot?: string;
 }
 
@@ -40,6 +42,7 @@ export async function createApp({
   syncCoordinator,
   nbaTeamIdentityService,
   nbaScheduleService,
+  footballProvider,
   webRoot: configuredWebRoot,
 }: AppDependencies): Promise<FastifyInstance> {
   const app = fastify({ logger: true });
@@ -180,6 +183,78 @@ export async function createApp({
     }
     return nbaScheduleService.refresh();
   });
+
+  app.get("/api/v1/sports/football/teams", async (request, reply) => {
+    if (!footballProvider) {
+      throw new ProviderNotRegisteredError("sport", "thesportsdb-football");
+    }
+    const { search, countries } = request.query as {
+      search?: string;
+      countries?: string;
+    };
+    const selectedCountries = countries
+      ?.split(",")
+      .map((country) => country.trim())
+      .filter(Boolean);
+    return {
+      items: await footballProvider.discoverForCountries(
+        { kind: search?.trim() ? "search" : "current", search },
+        selectedCountries,
+      ),
+      meta: {
+        source: footballProvider.id,
+        stale: false,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+  });
+
+  app.get("/api/v1/sports/football/countries", async () => {
+    if (!footballProvider) {
+      throw new ProviderNotRegisteredError("sport", "thesportsdb-football");
+    }
+    return { items: await footballProvider.listCountries() };
+  });
+
+  app.get(
+    "/api/v1/sports/football/countries/:country/leagues",
+    async (request) => {
+      if (!footballProvider) {
+        throw new ProviderNotRegisteredError("sport", "thesportsdb-football");
+      }
+      const { country } = request.params as { country: string };
+      return { items: await footballProvider.listCountryLeagues(country) };
+    },
+  );
+
+  app.post(
+    "/api/v1/sports/football/teams/:externalId/follow",
+    async (request, reply) => {
+      if (!footballProvider) {
+        throw new ProviderNotRegisteredError("sport", "thesportsdb-football");
+      }
+      const { externalId } = request.params as { externalId: string };
+      if (!externalId.trim()) {
+        return reply.code(400).send({
+          error: "invalid_request",
+          message: "externalId is required",
+        });
+      }
+      return reply
+        .code(201)
+        .send(
+          await trackingService.trackEntity(
+            await footballProvider.getEntity(externalId),
+          ),
+        );
+    },
+  );
+
+  app.get("/api/v1/sports/football/tracking", async () => ({
+    items: trackingService
+      .listTracked("sport")
+      .filter((item) => item.entity.provider === "thesportsdb-football"),
+  }));
 
   app.get("/api/v1/tracking", async (request, reply) => {
     const formatValue = (request.query as { format?: string }).format;
